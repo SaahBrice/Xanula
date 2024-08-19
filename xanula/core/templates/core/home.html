@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Welcome to Xanula{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="text-4xl font-bold mb-4">Welcome to Xanula</h1>
+    <p class="text-xl mb-8">Your comprehensive educational platform for interactive learning.</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold mb-4">Interactive Workbooks</h2>
+            <p>Engage with our collection of interactive workbooks to enhance your learning experience.</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold mb-4">Quizzes</h2>
+            <p>Test your knowledge with our diverse range of quizzes covering various subjects.</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold mb-4">Past Exam Papers</h2>
+            <p>Practice with past exam papers to prepare for your upcoming examinations.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

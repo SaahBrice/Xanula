@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Xanula{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <header class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Xanula</h1>
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a href="{% url 'core:home' %}" class="hover:underline">Home</a></li>
+                    <!-- Add more navigation items as needed -->
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto flex-grow p-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-200 p-4 mt-8">
+        <div class="container mx-auto text-center text-gray-600">
+            &copy; 2024 Xanula. All rights reserved.
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
