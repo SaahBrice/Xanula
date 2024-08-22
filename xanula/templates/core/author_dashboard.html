@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Xanula - Author Dashboard{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4" x-data="authorDashboard">
+    <h1 class="text-3xl font-bold mb-6">Author Dashboard: {{ author.name }}</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-2">Total Workbooks</h2>
+            <p class="text-3xl font-bold">{{ total_workbooks }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-2">Total Quizzes</h2>
+            <p class="text-3xl font-bold">{{ total_quizzes }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-2">Total Attempts</h2>
+            <p class="text-3xl font-bold">{{ total_attempts }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-2">Total Revenue (Xans)</h2>
+            <p class="text-3xl font-bold">{{ total_revenue }}</p>
+        </div>
+    </div>
+    
+    <h2 class="text-2xl font-bold mb-4">Your Workbooks</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for workbook in workbooks %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-semibold mb-2">{{ workbook.title }}</h3>
+            <p class="mb-2">Subject: {{ workbook.subject.name }}</p>
+            <p class="mb-2">Chapters: {{ workbook.chapter_set.count }}</p>
+            <button @click="selectWorkbook({{ workbook.id }}, '{{ workbook.title|escapejs }}')" 
+            class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        View Analytics
+    </button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Workbook Stats Modal -->
+    <div x-show="showModal" class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                        Workbook Statistics
+                    </h3>
+                    <div class="mt-2">
+                        <p x-text="'Total Attempts: ' + workbookStats.attempts"></p>
+                        <p x-text="'Average Score: ' + workbookStats.avgScore + '%'"></p>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button @click="showModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div x-show="selectedWorkbook" class="mt-8">
+        <h2 class="text-2xl font-bold mb-4" x-text="'Analytics for ' + selectedWorkbook.title"></h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold mb-4">Performance Over Time</h3>
+                <canvas id="performanceChart"></canvas>
+                <canvas x-show="!isLoading" id="performanceChart"></canvas>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold mb-4">Most Challenging Questions</h3>
+                <canvas id="challengingQuestionsChart"></canvas>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-xl font-semibold mb-4">Average Completion Time per Chapter</h3>
+                <canvas id="completionTimeChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('authorDashboard', () => ({
+        selectedWorkbook: null,
+        showModal: false,
+        workbookStats: {},
+        charts: {},
+
+        init() {
+            this.$watch('selectedWorkbook', (value) => {
+                if (value) {
+                    this.fetchAnalytics(value.id);
+                }
+            });
+        },
+
+        selectWorkbook(id, title) {
+            this.selectedWorkbook = { id, title };
+        },
+
+        async fetchAnalytics(workbookId) {
+            const response = await fetch(`/workbook/${workbookId}/analytics/`);
+            const data = await response.json();
+            this.renderCharts(data);
+        },
+
+        showWorkbookStats(workbookId) {
+
+            this.workbookStats = {
+                attempts: Math.floor(Math.random() * 1000),
+                avgScore: (Math.random() * 100).toFixed(2)
+            };
+            this.showModal = true;
+        },
+
+        renderCharts(data) {
+            this.renderPerformanceChart(data.attempts_over_time);
+            this.renderChallengingQuestionsChart(data.challenging_questions);
+            this.renderCompletionTimeChart(data.completion_time);
+        },
+
+        renderPerformanceChart(data) {
+            const ctx = document.getElementById('performanceChart');
+            if (this.charts.performance) {
+                this.charts.performance.destroy();
+            }
+            this.charts.performance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [{
+                        label: 'Average Score',
+                        data: data.map(d => d.avg_score),
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        },
+
+        renderChallengingQuestionsChart(data) {
+            const ctx = document.getElementById('challengingQuestionsChart');
+            if (this.charts.challengingQuestions) {
+                this.charts.challengingQuestions.destroy();
+            }
+            this.charts.challengingQuestions = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.question__text),
+                    datasets: [{
+                        label: 'Incorrect Attempts',
+                        data: data.map(d => d.incorrect_count),
+                        backgroundColor: 'rgb(255, 99, 132)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'y'
+                }
+            });
+        },
+
+        renderCompletionTimeChart(data) {
+            const ctx = document.getElementById('completionTimeChart');
+            if (this.charts.completionTime) {
+                this.charts.completionTime.destroy();
+            }
+            this.charts.completionTime = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.quiz__chapter__title),
+                    datasets: [{
+                        label: 'Average Completion Time (seconds)',
+                        data: data.map(d => d.avg_time),
+                        backgroundColor: 'rgb(54, 162, 235)'
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        }
+    }))
+})
+</script>
+{% endblock %}

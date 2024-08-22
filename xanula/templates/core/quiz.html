@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load quiz_extras %}
+
+{% block title %}Xanula - {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4" x-data="quizApp()">
+    <h1 class="text-3xl font-bold mb-6">{{ quiz.title }}</h1>
+    <form method="post" class="space-y-6" @submit="submitForm">
+        {% csrf_token %}
+        {% for field in form %}
+            {% if not field.is_hidden %}
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <p class="font-semibold mb-4">{{ field.label }}</p>
+                    {{ field }}
+                    {% with question_id=field.name|slice:"9:" %}
+                        {% if field.field.widget.input_type == 'checkbox' or field.field.widget.input_type == 'radio' %}
+                            <div x-data="{ startTime: Date.now() }" @change="recordResponse('{{ question_id }}', $event)">
+                                {{ field }}
+                            </div>
+                        {% endif %}
+                        <input type="hidden" name="response_time_{{ question_id }}" :value="responseTimes['{{ question_id }}']">
+                    {% endwith %}
+                </div>
+            {% endif %}
+        {% endfor %}
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Submit Quiz
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function quizApp() {
+    return {
+        startTimes: {},
+        responseTimes: {},
+        
+        init() {
+            this.startTimes = Object.fromEntries(
+                Array.from(document.querySelectorAll('input[type="radio"], input[type="checkbox"]')).map(
+                    input => [input.name.split('_')[1], Date.now()]
+                )
+            );
+        },
+        
+        recordResponse(questionId, event) {
+            const endTime = Date.now();
+            const startTime = this.startTimes[questionId];
+            this.responseTimes[questionId] = Math.round((endTime - startTime) / 1000);  // Convert to seconds
+            this.startTimes[questionId] = endTime;  // Reset start time for this question
+        },
+        
+        submitForm(event) {
+            Object.keys(this.startTimes).forEach(questionId => {
+                if (!this.responseTimes[questionId]) {
+                    const endTime = Date.now();
+                    const startTime = this.startTimes[questionId];
+                    this.responseTimes[questionId] = Math.round((endTime - startTime) / 1000);
+                }
+            });
+        }
+    }
+}
+</script>
+{% endblock %}

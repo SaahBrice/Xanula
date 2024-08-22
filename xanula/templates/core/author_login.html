@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Xanula - Author Login{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">Author Login</h1>
+    <form method="post" class="max-w-md mx-auto">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="unique_code" class="block text-gray-700 text-sm font-bold mb-2">Unique Code</label>
+            <input type="text" name="unique_code" id="unique_code" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+        </div>
+        {% if error %}
+        <p class="text-red-500 text-xs italic">{{ error }}</p>
+        {% endif %}
+        <div class="flex items-center justify-between">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Login
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

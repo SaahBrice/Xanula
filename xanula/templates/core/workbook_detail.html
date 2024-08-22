@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Xanula - {{ workbook.title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">{{ workbook.title }}</h1>
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <p class="text-gray-600 mb-4">By {{ workbook.author.name }}</p>
+        <p class="text-gray-600 mb-4">Subject: {{ workbook.subject.name }}</p>
+        {% if workbook.is_paid %}
+        <p class="text-red-600 mb-4">This is a paid workbook</p>
+        {% else %}
+        <p class="text-green-600 mb-4">This is a free workbook</p>
+        {% endif %}
+        <h2 class="text-2xl font-semibold mt-6 mb-4">Chapters and Quizzes</h2>
+        <ul class="space-y-4">
+            {% for chapter in workbook.chapter_set.all %}
+            <li>
+                <h3 class="text-xl font-semibold mb-2">{{ chapter.title }}</h3>
+                <ul class="space-y-2 ml-4">
+                    {% for quiz in chapter.quiz_set.all %}
+                    <li>
+                        <a href="{% url 'core:quiz' quiz.id %}" class="text-blue-600 hover:underline">{{ quiz.title }}</a>
+                    </li>
+                    {% empty %}
+                    <li>No quizzes available for this chapter.</li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% empty %}
+            <li>No chapters available for this workbook.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
