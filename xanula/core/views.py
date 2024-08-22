@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.db import transaction
-from .models import Author, ExplanationRequest, PastExamPaper, PastExamQuestion, Subject, Workbook, Chapter, Quiz, Question, Choice, QuizAttempt, QuestionResponse
+from .models import Author, ExplanationRequest, Notification, PastExamPaper, PastExamQuestion, Subject, Workbook, Chapter, Quiz, Question, Choice, QuizAttempt, QuestionResponse
 from django import forms
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.views.decorators.http import require_POST
@@ -327,3 +327,19 @@ class ExplanationRequestDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return super().get_queryset().filter(user=self.request.user)
+
+class NotificationListView(LoginRequiredMixin, ListView):
+    model = Notification
+    template_name = 'core/notification_list.html'
+    context_object_name = 'notifications'
+
+    def get_queryset(self):
+        return Notification.objects.filter(
+            recipient=self.request.user
+        ) | Notification.objects.filter(is_global=True).order_by('-created_at')
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+        Notification.objects.filter(is_global=True, is_read=False).update(is_read=True)
+        return response

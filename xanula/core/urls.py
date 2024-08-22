@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AuthorLoginView, DownloadSolutionView, ExplanationRequestDetailView, ExplanationRequestView, PastExamPaperDetailView, PastExamPaperListView, QuizAttempt, QuizResultView, QuizView, LandingPageView, StudentHomeView, WorkbookListView, WorkbookDetailView, AuthorDashboardView, get_explanation, workbook_analytics
+from .views import AuthorLoginView, DownloadSolutionView, ExplanationRequestDetailView, ExplanationRequestView, NotificationListView, PastExamPaperDetailView, PastExamPaperListView, QuizAttempt, QuizResultView, QuizView, LandingPageView, StudentHomeView, WorkbookListView, WorkbookDetailView, AuthorDashboardView, get_explanation, workbook_analytics
 
 
 app_name = 'core'
@@ -20,6 +20,7 @@ urlpatterns = [
     path('explanation-request/<int:question_id>/', ExplanationRequestView.as_view(), name='explanation_request'),
     path('explanation-request-detail/<int:pk>/', ExplanationRequestDetailView.as_view(), name='explanation_request_detail'),
     path('download-solution/<int:question_id>/', DownloadSolutionView.as_view(), name='download_solution'),
+    path('notifications/', NotificationListView.as_view(), name='notification_list'),
 ]
 
 

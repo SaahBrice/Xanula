@@ -44,4 +44,7 @@ urlpatterns = [
 
     path('explanation-requests/', views.ExplanationRequestListView.as_view(), name='explanation_request_list'),
     path('explanation-requests/<int:pk>/respond/', views.ExplanationRequestResponseView.as_view(), name='explanation_request_respond'),
+
+    path('notifications/', views.NotificationListView.as_view(), name='notification_list'),
+    path('notifications/create/', views.NotificationCreateView.as_view(), name='notification_create'),
 ]

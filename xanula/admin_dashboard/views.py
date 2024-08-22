@@ -3,10 +3,10 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
-from core.models import ExplanationRequest, Workbook, Subject, PastExamPaper
+from core.models import ExplanationRequest, Notification, Workbook, Subject, PastExamPaper
 from subscriptions.models import Subscription, SubscriptionPlan
 from django.contrib import messages
-from .forms import ExplanationResponseForm, PastExamPaperForm, SubjectForm, SubscriptionForm, SubscriptionPlanForm, UserForm, WorkbookForm
+from .forms import ExplanationResponseForm, NotificationForm, PastExamPaperForm, SubjectForm, SubscriptionForm, SubscriptionPlanForm, UserForm, WorkbookForm
 
 User = get_user_model()
 
@@ -262,3 +262,23 @@ class ExplanationRequestResponseView(StaffRequiredMixin, UpdateView):
     def form_valid(self, form):
         form.instance.responded_at = timezone.now()
         return super().form_valid(form)
+    
+
+class NotificationCreateView(StaffRequiredMixin, CreateView):
+    model = Notification
+    form_class = NotificationForm
+    template_name = 'admin_dashboard/notification_create.html'
+    success_url = reverse_lazy('admin_dashboard:notification_list')
+
+    def form_valid(self, form):
+        if form.cleaned_data['send_to_all']:
+            form.instance.is_global = True
+            form.instance.recipient = None
+        messages.success(self.request, 'Notification sent successfully.')
+        return super().form_valid(form)
+
+class NotificationListView(StaffRequiredMixin, ListView):
+    model = Notification
+    template_name = 'admin_dashboard/notification_list.html'
+    context_object_name = 'notifications'
+    paginate_by = 20

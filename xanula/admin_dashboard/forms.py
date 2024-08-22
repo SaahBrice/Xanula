@@ -1,5 +1,5 @@
 from django import forms
-from core.models import ExplanationRequest, Workbook, Subject, PastExamPaper
+from core.models import ExplanationRequest, Notification, Workbook, Subject, PastExamPaper
 from subscriptions.models import Subscription, SubscriptionPlan
 from django.contrib.auth import get_user_model
 
@@ -44,3 +44,25 @@ class ExplanationResponseForm(forms.ModelForm):
         widgets = {
             'admin_response': forms.Textarea(),
         }
+
+
+class NotificationForm(forms.ModelForm):
+    send_to_all = forms.BooleanField(required=False, initial=False, label="Send to all students")
+    recipient = forms.ModelChoiceField(queryset=User.objects.filter(is_staff=False), required=False)
+
+    class Meta:
+        model = Notification
+        fields = ['message', 'recipient', 'send_to_all']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        send_to_all = cleaned_data.get('send_to_all')
+        recipient = cleaned_data.get('recipient')
+
+        if not send_to_all and not recipient:
+            raise forms.ValidationError("You must either select a recipient or choose to send to all students.")
+
+        if send_to_all and recipient:
+            raise forms.ValidationError("You can't select a recipient and send to all students at the same time.")
+
+        return cleaned_data

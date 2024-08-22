@@ -2,7 +2,21 @@
 
 {% block title %}Xanula - Student Home{% endblock %}
 
+
+
 {% block content %}
+
+
+<div x-data="{ showNotifications: false, unreadCount: {{ unread_notifications_count }} }">
+    <button @click="showNotifications = !showNotifications" class="relative">
+        <i class="fas fa-bell"></i>
+        <span x-show="unreadCount > 0" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full" x-text="unreadCount"></span>
+    </button>
+    <div x-show="showNotifications" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-20" style="display: none;">
+        <!-- Notifications will be loaded here -->
+    </div>
+</div>
+
 <div class="container mx-auto px-4">
     <h1 class="text-3xl font-bold mb-6">Welcome, {{ user.username }}!</h1>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

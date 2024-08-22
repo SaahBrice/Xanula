@@ -137,3 +137,15 @@ class ExplanationRequest(models.Model):
 
     def __str__(self):
         return f"Request for {self.question} by {self.user.username}"
+
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    is_global = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Notification for {self.recipient or 'All'}: {self.message[:50]}..."

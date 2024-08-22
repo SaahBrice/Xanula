@@ -50,6 +50,14 @@
                         <i class="fas fa-users mr-3"></i>
                         Users
                     </a>
+                    <a href="{% url 'admin_dashboard:notification_list' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 {% if 'notification_list' in request.resolver_match.url_name %}bg-gray-700{% endif %}">
+                        <i class="fas fa-bell mr-3"></i>
+                        Notifications
+                    </a>
+                    <a href="{% url 'admin_dashboard:notification_create' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 {% if 'notification_create' in request.resolver_match.url_name %}bg-gray-700{% endif %}">
+                        <i class="fas fa-plus-circle mr-3"></i>
+                        Create Notification
+                    </a>
                 </nav>
             </div>
         </div>
