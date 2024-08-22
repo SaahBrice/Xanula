@@ -41,4 +41,7 @@ urlpatterns = [
     path('users/create/', views.UserCreateView.as_view(), name='user_create'),
     path('users/<int:pk>/update/', views.UserUpdateView.as_view(), name='user_update'),
     path('users/<int:pk>/delete/', views.UserDeleteView.as_view(), name='user_delete'),
+
+    path('explanation-requests/', views.ExplanationRequestListView.as_view(), name='explanation_request_list'),
+    path('explanation-requests/<int:pk>/respond/', views.ExplanationRequestResponseView.as_view(), name='explanation_request_respond'),
 ]

@@ -1,5 +1,5 @@
 from django import forms
-from core.models import Workbook, Subject, PastExamPaper
+from core.models import ExplanationRequest, Workbook, Subject, PastExamPaper
 from subscriptions.models import Subscription, SubscriptionPlan
 from django.contrib.auth import get_user_model
 
@@ -34,3 +34,13 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'is_staff', 'is_active']
+    
+
+
+class ExplanationResponseForm(forms.ModelForm):
+    class Meta:
+        model = ExplanationRequest
+        fields = ['admin_response']
+        widgets = {
+            'admin_response': forms.Textarea(),
+        }

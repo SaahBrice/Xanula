@@ -288,7 +288,7 @@ class PastExamPaperDetailView(LoginRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         exam_paper = self.get_object()
-        if exam_paper.is_paid and not request.user.profile.is_subscription_active():
+        if exam_paper.is_paid and not request.user.has_active_subscription():
             return HttpResponseForbidden("You must have an active subscription to access this content.")
         return super().get(request, *args, **kwargs)
 
@@ -296,7 +296,7 @@ class PastExamPaperDetailView(LoginRequiredMixin, DetailView):
 class DownloadSolutionView(LoginRequiredMixin, View):
     def get(self, request, question_id):
         question = get_object_or_404(PastExamQuestion, id=question_id)
-        if question.exam_paper.is_paid and not request.user.profile.is_subscription_active():
+        if question.exam_paper.is_paid and not request.user.request.user.has_active_subscription():
             return HttpResponseForbidden("You must have an active subscription to access this content.")
         
         response = HttpResponse(question.written_solution, content_type='application/pdf')

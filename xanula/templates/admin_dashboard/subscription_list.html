@@ -17,6 +17,7 @@
                 <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Start Date</th>
                 <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">End Date</th>
                 <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Is Active</th>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">SUBSCRIPTION ENDED</th>
                 <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Actions</th>
             </tr>
         </thead>
@@ -28,6 +29,18 @@
                 <td class="py-4 px-6 border-b border-grey-light">{{ subscription.start_date|date:"Y-m-d" }}</td>
                 <td class="py-4 px-6 border-b border-grey-light">{{ subscription.end_date|date:"Y-m-d" }}</td>
                 <td class="py-4 px-6 border-b border-grey-light">{{ subscription.is_active|yesno:"Yes,No" }}</td>
+                
+                    {% if subscription.start_date == subscription.end_date %}
+                        {% if subscription.is_active %}
+                        <td class="py-4 px-6 border-b border-grey-light text-red-600">YES</td>
+                        {% else %}
+                        <td class="py-4 px-6 border-b border-grey-light ">done</td>
+                        {% endif %}
+                    {% else %}
+                    <td class="py-4 px-6 border-b border-grey-light ">no</td>
+                    {% endif %}
+
+                
                 <td class="py-4 px-6 border-b border-grey-light">
                     <a href="{% url 'admin_dashboard:subscription_update' subscription.id %}" class="text-green-600 hover:text-green-900 mr-2">
                         <i class="fas fa-edit"></i> Edit

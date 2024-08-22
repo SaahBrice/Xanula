@@ -1,0 +1,48 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block title %}Explanation Requests{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">Pending Explanation Requests</h1>
+    
+    <div class="bg-white shadow-md rounded my-6">
+        <table class="text-left w-full border-collapse">
+            <thead>
+                <tr>
+                    <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">User</th>
+                    <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Question</th>
+                    <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Created At</th>
+                    <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Answered</th>
+                    <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in explanation_requests %}
+                <tr class="hover:bg-grey-lighter">
+                    <td class="py-4 px-6 border-b border-grey-light">{{ request.user.username }}</td>
+                    <td class="py-4 px-6 border-b border-grey-light">{{ request.question }}</td>
+                    <td class="py-4 px-6 border-b border-grey-light">{{ request.created_at|date:"Y-m-d H:i" }}</td>
+                    {% if request.responded_at %}
+                    <td class="py-4 px-6 border-b border-grey-light">yes</td>
+                    
+                    {% else %}
+                    <td class="py-4 px-6 border-b border-grey-light text-red-600">NO</td>
+                    
+                    {% endif %}
+                    <td class="py-4 px-6 border-b border-grey-light">
+                        <a href="{% url 'admin_dashboard:explanation_request_respond' request.id %}" class="text-blue-600 hover:text-blue-900">Respond</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="py-4 px-6 border-b border-grey-light text-center">No pending explanation requests.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "admin_dashboard/pagination.html" %}
+</div>
+{% endblock %}

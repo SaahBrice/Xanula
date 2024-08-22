@@ -77,24 +77,24 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'accounts/password_reset_complete.html'
 
 
-class SubscriptionView(LoginRequiredMixin, FormView):
-    template_name = 'accounts/subscription.html'
-    form_class = SubscriptionForm
-    success_url = reverse_lazy('core:student_home')
+# class SubscriptionView(LoginRequiredMixin, FormView):
+#     template_name = 'accounts/subscription.html'
+#     form_class = SubscriptionForm
+#     success_url = reverse_lazy('core:student_home')
     
-    def form_valid(self, form):
-        profile = self.request.user.profile
-        duration = form.cleaned_data['duration']
+#     def form_valid(self, form):
+#         profile = self.request.user.profile
+#         duration = form.cleaned_data['duration']
         
-        if duration == '1_month':
-            end_date = timezone.now() + relativedelta(months=1)
-        elif duration == '6_months':
-            end_date = timezone.now() + relativedelta(months=6)
-        elif duration == '1_year':
-            end_date = timezone.now() + relativedelta(years=1)
+#         if duration == '1_month':
+#             end_date = timezone.now() + relativedelta(months=1)
+#         elif duration == '6_months':
+#             end_date = timezone.now() + relativedelta(months=6)
+#         elif duration == '1_year':
+#             end_date = timezone.now() + relativedelta(years=1)
         
-        profile.is_subscribed = True
-        profile.subscription_end_date = end_date
-        profile.save()
+#         profile.is_subscribed = True
+#         profile.subscription_end_date = end_date
+#         profile.save()
         
-        return super().form_valid(form)
+#         return super().form_valid(form)

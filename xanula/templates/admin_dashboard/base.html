@@ -34,6 +34,10 @@
                         <i class="fas fa-file-alt mr-3"></i>
                         Past Exam Papers
                     </a>
+                    <a href="{% url 'admin_dashboard:explanation_request_list' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 {% if 'explanation_request' in request.resolver_match.url_name %}bg-gray-700{% endif %}">
+                        <i class="fas fa-question-circle mr-3"></i>
+                        Explanation Requests
+                    </a>
                     <a href="{% url 'admin_dashboard:subscription_list' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 {% if 'subscription' in request.resolver_match.url_name %}bg-gray-700{% endif %}">
                         <i class="fas fa-credit-card mr-3"></i>
                         Subscriptions

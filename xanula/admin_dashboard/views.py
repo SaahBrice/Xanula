@@ -1,11 +1,12 @@
+from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
-from core.models import Workbook, Subject, PastExamPaper
+from core.models import ExplanationRequest, Workbook, Subject, PastExamPaper
 from subscriptions.models import Subscription, SubscriptionPlan
 from django.contrib import messages
-from .forms import PastExamPaperForm, SubjectForm, SubscriptionForm, SubscriptionPlanForm, UserForm, WorkbookForm
+from .forms import ExplanationResponseForm, PastExamPaperForm, SubjectForm, SubscriptionForm, SubscriptionPlanForm, UserForm, WorkbookForm
 
 User = get_user_model()
 
@@ -241,3 +242,23 @@ class UserDeleteView(StaffRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'User deleted successfully.')
         return super().delete(request, *args, **kwargs)
+
+
+class ExplanationRequestListView(StaffRequiredMixin, ListView):
+    model = ExplanationRequest
+    template_name = 'admin_dashboard/explanation_request_list.html'
+    context_object_name = 'explanation_requests'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return ExplanationRequest.objects.all().order_by('-created_at')
+
+class ExplanationRequestResponseView(StaffRequiredMixin, UpdateView):
+    model = ExplanationRequest
+    form_class = ExplanationResponseForm
+    template_name = 'admin_dashboard/explanation_request_response.html'
+    success_url = reverse_lazy('admin_dashboard:explanation_request_list')
+
+    def form_valid(self, form):
+        form.instance.responded_at = timezone.now()
+        return super().form_valid(form)
