@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">Past Exam Papers</h1>
+    
+    <form method="get" class="mb-6">
+        <select name="subject" class="mr-2">
+            <option value="">All Subjects</option>
+            {% for subject in subjects %}
+                <option value="{{ subject.name }}" {% if request.GET.subject == subject.name %}selected{% endif %}>
+                    {{ subject.name }}
+                </option>
+            {% endfor %}
+        </select>
+        <select name="year" class="mr-2">
+            <option value="">All Years</option>
+            {% for year in years %}
+                <option value="{{ year }}" {% if request.GET.year == year|stringformat:"i" %}selected{% endif %}>
+                    {{ year }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Filter
+        </button>
+    </form>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {% for paper in exam_papers %}
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-2">{{ paper.name }}</h2>
+                <p>Subject: {{ paper.subject.name }}</p>
+                <p>Year: {{ paper.year }}</p>
+                {% if paper.is_paid %}
+                    <p class="text-red-500">Paid Content</p>
+                {% endif %}
+                <a href="{% url 'core:past_exam_paper_detail' paper.pk %}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    View Paper
+                </a>
+            </div>
+        {% empty %}
+            <p>No exam papers found.</p>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <div class="flex justify-center space-x-2">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Previous</a>
+        {% endif %}
+
+        <span class="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

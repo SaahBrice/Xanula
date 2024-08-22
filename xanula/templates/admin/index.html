@@ -1,0 +1,10 @@
+{% extends "admin/index.html" %}
+
+{% block sidebar %}
+{{ block.super }}
+<div style="padding: 10px; background-color: #f8f8f8; border: 1px solid #ccc; margin-top: 10px;">
+    <h3>Explanation Requests</h3>
+    <p>Pending requests: {{ pending_requests }}</p>
+    <a href="{% url 'admin:core_explanationrequest_changelist' %}?status__exact=pending">View pending requests</a>
+</div>
+{% endblock %}

@@ -97,3 +97,43 @@ class QuestionResponse(models.Model):
 
     class Meta:
         unique_together = ['quiz_attempt', 'question']
+
+
+
+class PastExamPaper(models.Model):
+    name = models.CharField(max_length=200)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    year = models.PositiveIntegerField()
+    pdf_file = models.FileField(upload_to='past_exam_papers/')
+    is_paid = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.name} - {self.year}"
+
+class PastExamQuestion(models.Model):
+    exam_paper = models.ForeignKey(PastExamPaper, on_delete=models.CASCADE)
+    question_number = models.PositiveIntegerField()
+    video_solution_url = models.URLField(help_text="YouTube video URL for the solution", blank=True)
+    written_solution = models.FileField(upload_to='past_exam_solutions/pdfs/')
+
+    class Meta:
+        unique_together = ['exam_paper', 'question_number']
+
+    def __str__(self):
+        return f"{self.exam_paper.name} - Question {self.question_number}"
+
+class ExplanationRequest(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('answered', 'Answered'),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    question = models.ForeignKey(PastExamQuestion, on_delete=models.CASCADE)
+    request_text = models.TextField()
+    admin_response = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
+    def __str__(self):
+        return f"Request for {self.question} by {self.user.username}"

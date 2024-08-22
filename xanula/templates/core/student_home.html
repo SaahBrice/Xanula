@@ -22,5 +22,53 @@
         <p>No subjects available.</p>
         {% endfor %}
     </div>
+
+    <!-- New section for recent explanation requests -->
+    <h2 class="text-2xl font-semibold mb-4">Recent Explanation Requests</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {% for request in recent_explanation_requests %}
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <h3 class="text-xl font-semibold mb-2">Request for {{ request.question.exam_paper.name }}</h3>
+                <p class="mb-2">Status: 
+                    {% if request.status == 'pending' %}
+                        <span class="text-yellow-600">Pending</span>
+                    {% else %}
+                        <span class="text-green-600">Answered</span>
+                    {% endif %}
+                </p>
+                <p class="mb-2">Submitted: {{ request.created_at|date:"F j, Y" }}</p>
+                <a href="{% url 'core:explanation_request_detail' request.pk %}" class="mt-2 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    View Details
+                </a>
+            </div>
+        {% empty %}
+            <p>No recent explanation requests.</p>
+        {% endfor %}
+    </div>
+
+    <h2 class="text-2xl font-semibold mb-4">Recently Added Exam Papers</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {% for paper in recent_exam_papers %}
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <h3 class="text-xl font-semibold mb-2">{{ paper.name }}</h3>
+                <p class="mb-2">Subject: {{ paper.subject.name }}</p>
+                <p class="mb-2">Year: {{ paper.year }}</p>
+                {% if paper.is_paid %}
+                    <p class="text-red-500 mb-2">Paid Content</p>
+                {% endif %}
+                <a href="{% url 'core:past_exam_paper_detail' paper.pk %}" class="mt-2 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    View Paper
+                </a>
+            </div>
+        {% empty %}
+            <p>No recent exam papers available.</p>
+        {% endfor %}
+    </div>
+
+    <div class="text-center">
+        <a href="{% url 'core:past_exam_paper_list' %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+            See All Exam Papers
+        </a>
+    </div>
 </div>
 {% endblock %}

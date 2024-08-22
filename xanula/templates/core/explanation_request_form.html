@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">Request Further Explanation</h1>
+    <form method="post" class="max-w-lg">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Submit Request
+        </button>
+    </form>
+</div>
+{% endblock %}

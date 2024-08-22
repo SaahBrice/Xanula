@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load youtube_filters %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">{{ exam_paper.name }}</h1>
+    <p>Subject: {{ exam_paper.subject.name }}</p>
+    <p>Year: {{ exam_paper.year }}</p>
+
+    <div class="flex flex-col md:flex-row mt-6 space-y-6 md:space-y-0 md:space-x-6">
+        <!-- PDF Viewer Column -->
+        <div class="w-full md:w-2/3">
+            <h2 class="text-2xl font-bold mb-4">Exam Paper</h2>
+            <div id="pdf-viewer" class="border border-gray-300" style="height: 800px; overflow-y: auto;"></div>
+            <div class="mt-4 flex justify-between">
+                <button id="prev" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Previous</button>
+                <span id="page_num"></span>
+                <button id="next" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Next</button>
+            </div>
+        </div>
+
+        <!-- Solutions Column -->
+        <div class="w-full md:w-1/3">
+            <h2 class="text-2xl font-bold mb-4">Solutions</h2>
+            {% for question in exam_paper.pastexamquestion_set.all %}
+                <div class="mb-6 p-4 bg-gray-100 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2">Question {{ question.question_number }}</h3>
+                    <div class="aspect-w-16 aspect-h-9 mb-2">
+                        <iframe src="https://www.youtube.com/embed/{{ question.video_solution_url|youtube_video_id }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="flex flex-col space-y-2 mt-2">
+                        <a href="{% url 'core:download_solution' question.id %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center">
+                            Download Written Solution
+                        </a>
+                        <a href="{% url 'core:explanation_request' question.id %}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded text-center">
+                            Request Further Explanation
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // PDF.js viewer
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
+
+    var url = '{{ exam_paper.pdf_file.url }}';
+    var pdfDoc = null,
+        pageNum = 1,
+        pageRendering = false,
+        pageNumPending = null,
+        scale = 1.5,
+        canvas = document.createElement('canvas'),
+        ctx = canvas.getContext('2d');
+
+    document.getElementById('pdf-viewer').appendChild(canvas);
+
+    function renderPage(num) {
+        pageRendering = true;
+        pdfDoc.getPage(num).then(function(page) {
+            var viewport = page.getViewport({scale: scale});
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            var renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            var renderTask = page.render(renderContext);
+
+            renderTask.promise.then(function() {
+                pageRendering = false;
+                if (pageNumPending !== null) {
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+            });
+        });
+
+        document.getElementById('page_num').textContent = num + ' / ' + pdfDoc.numPages;
+    }
+
+    function queueRenderPage(num) {
+        if (pageRendering) {
+            pageNumPending = num;
+        } else {
+            renderPage(num);
+        }
+    }
+
+    function onPrevPage() {
+        if (pageNum <= 1) {
+            return;
+        }
+        pageNum--;
+        queueRenderPage(pageNum);
+    }
+
+    function onNextPage() {
+        if (pageNum >= pdfDoc.numPages) {
+            return;
+        }
+        pageNum++;
+        queueRenderPage(pageNum);
+    }
+
+    document.getElementById('prev').addEventListener('click', onPrevPage);
+    document.getElementById('next').addEventListener('click', onNextPage);
+
+    pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        document.getElementById('page_num').textContent = pageNum + ' / ' + pdfDoc.numPages;
+        renderPage(pageNum);
+    });
+</script>
+{% endblock %}

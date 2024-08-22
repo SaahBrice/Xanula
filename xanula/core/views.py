@@ -1,15 +1,16 @@
 from datetime import timedelta
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect, render
 from django.views import View
-from django.views.generic import ListView, DetailView, FormView, TemplateView
+from django.views.generic import ListView, DetailView, FormView, TemplateView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.db import transaction
-from .models import Author, Subject, Workbook, Chapter, Quiz, Question, Choice, QuizAttempt, QuestionResponse
+from .models import Author, ExplanationRequest, PastExamPaper, PastExamQuestion, Subject, Workbook, Chapter, Quiz, Question, Choice, QuizAttempt, QuestionResponse
 from django import forms
-from django.http import JsonResponse
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from .ai_utils import get_ai_explanation
@@ -33,6 +34,12 @@ class StudentHomeView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Subject.objects.prefetch_related('workbook_set')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['recent_exam_papers'] = PastExamPaper.objects.order_by('-id')[:5]  # Get 5 most recent exam papers
+        context['recent_explanation_requests'] = ExplanationRequest.objects.filter(user=self.request.user).order_by('-created_at')[:5]
+        return context
 
 
 
@@ -246,3 +253,77 @@ def workbook_analytics(request, workbook_id):
         'challenging_questions': list(challenging_questions),
         'completion_time': list(completion_time)
     })
+
+
+
+
+class PastExamPaperListView(LoginRequiredMixin, ListView):
+    model = PastExamPaper
+    template_name = 'core/past_exam_paper_list.html'
+    context_object_name = 'exam_papers'
+    paginate_by = 12  # Show 12 exam papers per page
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        subject = self.request.GET.get('subject')
+        year = self.request.GET.get('year')
+        if subject:
+            queryset = queryset.filter(subject__name=subject)
+        if year:
+            queryset = queryset.filter(year=year)
+        return queryset.order_by('-year', 'subject__name', 'name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['subjects'] = Subject.objects.all()
+        context['years'] = PastExamPaper.objects.values_list('year', flat=True).distinct().order_by('-year')
+        return context
+
+
+
+class PastExamPaperDetailView(LoginRequiredMixin, DetailView):
+    model = PastExamPaper
+    template_name = 'core/past_exam_paper_detail.html'
+    context_object_name = 'exam_paper'
+
+    def get(self, request, *args, **kwargs):
+        exam_paper = self.get_object()
+        if exam_paper.is_paid and not request.user.profile.is_subscription_active():
+            return HttpResponseForbidden("You must have an active subscription to access this content.")
+        return super().get(request, *args, **kwargs)
+
+
+class DownloadSolutionView(LoginRequiredMixin, View):
+    def get(self, request, question_id):
+        question = get_object_or_404(PastExamQuestion, id=question_id)
+        if question.exam_paper.is_paid and not request.user.profile.is_subscription_active():
+            return HttpResponseForbidden("You must have an active subscription to access this content.")
+        
+        response = HttpResponse(question.written_solution, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{question.exam_paper.name}_Q{question.question_number}_solution.pdf"'
+        return response
+
+
+
+
+class ExplanationRequestView(LoginRequiredMixin, CreateView):
+    model = ExplanationRequest
+    fields = ['request_text']
+    template_name = 'core/explanation_request_form.html'
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.question = get_object_or_404(PastExamQuestion, pk=self.kwargs['question_id'])
+        form.instance.status = 'pending'
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('core:explanation_request_detail', kwargs={'pk': self.object.pk})
+
+class ExplanationRequestDetailView(LoginRequiredMixin, DetailView):
+    model = ExplanationRequest
+    template_name = 'core/explanation_request_detail.html'
+    context_object_name = 'request'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
