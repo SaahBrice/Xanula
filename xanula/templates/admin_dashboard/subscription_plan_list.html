@@ -1,0 +1,42 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">Subscription Plans</h1>
+    <a href="{% url 'admin_dashboard:subscription_plan_create' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Create Subscription Plan
+    </a>
+</div>
+
+<div class="bg-white shadow-md rounded my-6">
+    <table class="text-left w-full border-collapse">
+        <thead>
+            <tr>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Name</th>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Duration (days)</th>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Price</th>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plan in subscription_plans %}
+            <tr class="hover:bg-grey-lighter">
+                <td class="py-4 px-6 border-b border-grey-light">{{ plan.name }}</td>
+                <td class="py-4 px-6 border-b border-grey-light">{{ plan.duration_days }}</td>
+                <td class="py-4 px-6 border-b border-grey-light">{{ plan.price }}</td>
+                <td class="py-4 px-6 border-b border-grey-light">
+                    <a href="{% url 'admin_dashboard:subscription_plan_update' plan.id %}" class="text-green-600 hover:text-green-900 mr-2">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'admin_dashboard:subscription_plan_delete' plan.id %}" class="text-red-600 hover:text-red-900">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "admin_dashboard/pagination.html" %}
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">Subscriptions</h1>
+    <a href="{% url 'admin_dashboard:subscription_create' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Create Subscription
+    </a>
+</div>
+
+<div class="bg-white shadow-md rounded my-6">
+    <table class="text-left w-full border-collapse">
+        <thead>
+            <tr>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">User</th>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Plan</th>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Start Date</th>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">End Date</th>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Is Active</th>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subscription in subscriptions %}
+            <tr class="hover:bg-grey-lighter">
+                <td class="py-4 px-6 border-b border-grey-light">{{ subscription.user.username }}</td>
+                <td class="py-4 px-6 border-b border-grey-light">{{ subscription.plan.name }}</td>
+                <td class="py-4 px-6 border-b border-grey-light">{{ subscription.start_date|date:"Y-m-d" }}</td>
+                <td class="py-4 px-6 border-b border-grey-light">{{ subscription.end_date|date:"Y-m-d" }}</td>
+                <td class="py-4 px-6 border-b border-grey-light">{{ subscription.is_active|yesno:"Yes,No" }}</td>
+                <td class="py-4 px-6 border-b border-grey-light">
+                    <a href="{% url 'admin_dashboard:subscription_update' subscription.id %}" class="text-green-600 hover:text-green-900 mr-2">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'admin_dashboard:subscription_delete' subscription.id %}" class="text-red-600 hover:text-red-900">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "admin_dashboard/pagination.html" %}
+{% endblock %}

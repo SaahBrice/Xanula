@@ -26,7 +26,7 @@
                             </span>
                         {% endif %}
                     </a>
-
+                    <a href="{% url 'subscriptions:subscription_list' %}" class="text-white hover:underline">Manage Subscriptions</a>
                 {% else %}
                 <a href="{% url 'accounts:login' %}">Login</a>
                 <a href="{% url 'accounts:signup' %}">Sign Up</a>

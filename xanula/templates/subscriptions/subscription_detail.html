@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-6">Subscription Details</h1>
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-2xl font-bold mb-4">{{ subscription.plan.name }}</h2>
+        <p class="mb-2"><strong>Start Date:</strong> {{ subscription.start_date|date:"F j, Y" }}</p>
+        <p class="mb-2"><strong>End Date:</strong> {{ subscription.end_date|date:"F j, Y" }}</p>
+        <p class="mb-2"><strong>Status:</strong> {% if subscription.is_valid %}Active{% else %}Expired{% endif %}</p>
+        <p class="mb-2"><strong>Price:</strong> ${{ subscription.plan.price }}</p>
+        <p class="mb-4"><strong>Description:</strong> {{ subscription.plan.description }}</p>
+        {% if subscription.is_valid %}
+            <p class="text-green-600 font-bold">Your subscription is currently active.</p>
+        {% else %}
+            <p class="text-red-600 font-bold">This subscription has expired.</p>
+            <a href="{% url 'subscriptions:subscription_create' %}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Renew Subscription
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

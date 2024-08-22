@@ -1,0 +1,22 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.pk %}Edit Workbook{% else %}Create Workbook{% endif %}{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <h2 class="text-2xl font-bold mb-6">{% if form.instance.pk %}Edit Workbook{% else %}Create Workbook{% endif %}</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div class="flex items-center justify-between mt-4">
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                {% if form.instance.pk %}Update{% else %}Create{% endif %}
+            </button>
+            <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="{% url 'admin_dashboard:workbook_list' %}">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

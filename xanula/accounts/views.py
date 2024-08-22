@@ -24,7 +24,10 @@ class LoginView(View):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('core:student_home')
+            if user.is_staff:
+                return redirect('admin_dashboard:dashboard')
+            else:
+                return redirect('core:student_home')
         else:
             messages.error(request, 'Invalid username or password.')
         return render(request, self.template_name)

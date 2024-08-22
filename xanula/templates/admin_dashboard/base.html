@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %} | Xanula</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-100" x-data="{ sidebarOpen: false }">
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div :class="{'hidden': !sidebarOpen, 'block': sidebarOpen}" class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-800 lg:translate-x-0 lg:static lg:inset-0 md:flex md:flex-col">
+            <div class="flex items-center justify-center h-16 bg-gray-900">
+                <span class="text-white font-bold uppercase">Admin Dashboard</span>
+            </div>
+            <div class="flex flex-col flex-1 overflow-y-auto">
+                <nav class="flex-1 px-2 py-4 bg-gray-800">
+                    <a href="{% url 'admin_dashboard:dashboard' %}" class="flex items-center px-4 py-2 text-gray-100 hover:bg-gray-700 {% if request.resolver_match.url_name == 'dashboard' %}bg-gray-700{% endif %}">
+                        <i class="fas fa-tachometer-alt mr-3"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'admin_dashboard:workbook_list' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 {% if 'workbook' in request.resolver_match.url_name %}bg-gray-700{% endif %}">
+                        <i class="fas fa-book mr-3"></i>
+                        Workbooks
+                    </a>
+                    <a href="{% url 'admin_dashboard:subject_list' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 {% if 'subject' in request.resolver_match.url_name %}bg-gray-700{% endif %}">
+                        <i class="fas fa-graduation-cap mr-3"></i>
+                        Subjects
+                    </a>
+                    <a href="{% url 'admin_dashboard:past_exam_paper_list' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 {% if 'past_exam_paper' in request.resolver_match.url_name %}bg-gray-700{% endif %}">
+                        <i class="fas fa-file-alt mr-3"></i>
+                        Past Exam Papers
+                    </a>
+                    <a href="{% url 'admin_dashboard:subscription_list' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 {% if 'subscription' in request.resolver_match.url_name %}bg-gray-700{% endif %}">
+                        <i class="fas fa-credit-card mr-3"></i>
+                        Subscriptions
+                    </a>
+                    <a href="{% url 'admin_dashboard:subscription_plan_list' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 {% if 'subscription_plan' in request.resolver_match.url_name %}bg-gray-700{% endif %}">
+                        <i class="fas fa-list-alt mr-3"></i>
+                        Subscription Plans
+                    </a>
+                    <a href="{% url 'admin_dashboard:user_list' %}" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700 {% if 'user' in request.resolver_match.url_name %}bg-gray-700{% endif %}">
+                        <i class="fas fa-users mr-3"></i>
+                        Users
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <header class="flex items-center justify-between px-6 py-4 bg-white border-b">
+                <div class="flex items-center">
+                    <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 focus:outline-none lg:hidden">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 6H20M4 12H20M4 18H11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <span class="mx-4 text-2xl font-semibold text-gray-800">{{ request.user.username }}</span>
+                </div>
+                <div class="flex items-center">
+                    <a href="{% url 'core:student_home' %}" class="text-gray-600 hover:text-gray-800 mr-4">
+                        <i class="fas fa-home mr-1"></i>
+                        Student Home
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-sign-out-alt mr-1"></i>
+                        Logout
+                    </a>
+                </div>
+            </header>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200">
+                <div class="container mx-auto px-6 py-8">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="bg-{{ message.tags }}-100 border-l-4 border-{{ message.tags }}-500 text-{{ message.tags }}-700 p-4 mb-4" role="alert">
+                                <p class="font-bold">{{ message }}</p>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+            <footer class="bg-white border-t p-4 text-center text-gray-600">
+                <p>&copy; {% now "Y" %} Xanula. All rights reserved.</p>
+            </footer>
+        </div>
+    </div>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
