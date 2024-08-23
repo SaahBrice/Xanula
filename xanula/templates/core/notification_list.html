@@ -7,8 +7,11 @@
         <ul class="divide-y divide-gray-200">
             {% for notification in notifications %}
             <li class="p-4 hover:bg-gray-50">
+                <br>
                 <p class="text-sm font-medium text-gray-900">{{ notification.message }}</p>
-                <p class="text-sm text-gray-500">{{ notification.created_at|date:"F j, Y, g:i a" }}</p>
+
+                <p class="text-sm text-gray-500"><span class="text-sm">by  ADMIN </span> {{ notification.created_at|date:"F j, Y, g:i a" }}</p>
+                
             </li>
             {% empty %}
             <li class="p-4">

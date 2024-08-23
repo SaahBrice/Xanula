@@ -12,7 +12,6 @@
             {% if not field.is_hidden %}
                 <div class="bg-white shadow-md rounded-lg p-6">
                     <p class="font-semibold mb-4">{{ field.label }}</p>
-                    {{ field }}
                     {% with question_id=field.name|slice:"9:" %}
                         {% if field.field.widget.input_type == 'checkbox' or field.field.widget.input_type == 'radio' %}
                             <div x-data="{ startTime: Date.now() }" @change="recordResponse('{{ question_id }}', $event)">

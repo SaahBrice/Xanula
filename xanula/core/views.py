@@ -17,6 +17,7 @@ from .ai_utils import get_ai_explanation
 from .models import QuestionResponse
 from django.db.models.functions import TruncDate
 from django.db.models import Sum, Count, Avg
+from django.template.loader import render_to_string
 
 
 class LandingPageView(TemplateView):
@@ -343,3 +344,33 @@ class NotificationListView(LoginRequiredMixin, ListView):
         Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
         Notification.objects.filter(is_global=True, is_read=False).update(is_read=True)
         return response
+
+
+
+def get_recent_notifications(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'html': '', 'count': 0})
+
+    notifications = Notification.objects.filter(
+        recipient=request.user, 
+        is_read=False
+    ) | Notification.objects.filter(
+        is_global=True, 
+        is_read=False
+    ).order_by('-created_at')[:5]
+
+    html = render_to_string('core/recent_notifications.html', {'notifications': notifications})
+    
+    # Mark fetched notifications as read
+    notifications.update(is_read=True)
+    
+    # Get updated count
+    new_count = Notification.objects.filter(
+        recipient=request.user, 
+        is_read=False
+    ).count() + Notification.objects.filter(
+        is_global=True, 
+        is_read=False
+    ).count()
+
+    return JsonResponse({'html': html, 'count': new_count})
