@@ -12,6 +12,7 @@
     <table class="text-left w-full border-collapse">
         <thead>
             <tr>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Image</th>
                 <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Title</th>
                 <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Subject</th>
                 <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Author</th>
@@ -22,6 +23,9 @@
         <tbody>
             {% for workbook in workbooks %}
             <tr class="hover:bg-grey-lighter">
+                <td class="py-4 px-6 border-b border-grey-light">
+                    <img src="{{ workbook.image.url }}" alt="{{ workbook.title }}" class="w-8 h-8 object-cover rounded">
+                </td>
                 <td class="py-4 px-6 border-b border-grey-light">{{ workbook.title }}</td>
                 <td class="py-4 px-6 border-b border-grey-light">{{ workbook.subject }}</td>
                 <td class="py-4 px-6 border-b border-grey-light">{{ workbook.author }}</td>

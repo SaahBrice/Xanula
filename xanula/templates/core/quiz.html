@@ -4,17 +4,21 @@
 {% block title %}Xanula - {{ quiz.title }}{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4" x-data="quizApp()">
-    <h1 class="text-3xl font-bold mb-6">{{ quiz.title }}</h1>
-    <form method="post" class="space-y-6" @submit="submitForm">
+<div class="container mx-auto px-4 py-12" x-data="quizApp()">
+    <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-8">{{ quiz.title }}</h1>
+    <form method="post" class="space-y-8 sm:pl-40" @submit="submitForm">
         {% csrf_token %}
         {% for field in form %}
             {% if not field.is_hidden %}
-                <div class="bg-white shadow-md rounded-lg p-6">
-                    <p class="font-semibold mb-4">{{ field.label }}</p>
+                <div class="text-xl leading-relaxed">
+                    <p class="font-semibold mb-4">{{ forloop.counter }}) {{ field.label }}</p>
                     {% with question_id=field.name|slice:"9:" %}
                         {% if field.field.widget.input_type == 'checkbox' or field.field.widget.input_type == 'radio' %}
                             <div x-data="{ startTime: Date.now() }" @change="recordResponse('{{ question_id }}', $event)">
+                                {{ field }}
+                            </div>
+                        {% else %}
+                            <div>
                                 {{ field }}
                             </div>
                         {% endif %}
@@ -23,9 +27,11 @@
                 </div>
             {% endif %}
         {% endfor %}
-        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Submit Quiz
-        </button>
+        <div class="text-center mt-12">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition duration-300">
+                Submit Quiz
+            </button>
+        </div>
     </form>
 </div>
 {% endblock %}

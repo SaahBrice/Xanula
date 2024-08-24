@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load core_extras %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-8">Search Results</h1>
+
+    <form method="get" action="{% url 'core:search' %}" class="mb-8">
+        <div class="flex flex-col md:flex-row items-center md:space-x-4 space-y-4 md:space-y-0">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search..." class="form-input flex-grow py-3 px-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <select name="type" class="form-select py-3 px-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="all" {% if content_type == 'all' %}selected{% endif %}>All</option>
+                <option value="workbook" {% if content_type == 'workbook' %}selected{% endif %}>Workbooks</option>
+                <option value="exam_paper" {% if content_type == 'exam_paper' %}selected{% endif %}>Exam Papers</option>
+            </select>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full">
+                Search
+            </button>
+        </div>
+    </form>
+
+    {% if object_list %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for item in object_list %}
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    {% if item|class_name == 'Workbook' %}
+                        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h2 class="font-bold text-2xl mb-4">{{ item.title }}</h2>
+                            <p class="text-gray-700 text-lg mb-2">Subject: {{ item.subject.name }}</p>
+                            <p class="text-gray-700 text-lg mb-4">Author: {{ item.author.name }}</p>
+                            <a href="{% url 'core:workbook_detail' item.id %}" class="text-blue-600 hover:text-blue-800 font-semibold">View Workbook</a>
+                        </div>
+                    {% elif item|class_name == 'PastExamPaper' %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h2 class="font-bold text-2xl mb-4">{{ item.name }}</h2>
+                            <p class="text-gray-700 text-lg mb-2">Subject: {{ item.subject.name }}</p>
+                            <p class="text-gray-700 text-lg mb-4">Year: {{ item.year }}</p>
+                            <a href="{% url 'core:past_exam_paper_detail' item.id %}" class="text-blue-600 hover:text-blue-800 font-semibold">View Exam Paper</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-lg text-gray-600 mt-6">No results found.</p>
+    {% endif %}
+</div>
+{% endblock %}

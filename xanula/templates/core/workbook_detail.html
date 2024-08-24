@@ -3,35 +3,91 @@
 {% block title %}Xanula - {{ workbook.title }}{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold mb-6">{{ workbook.title }}</h1>
-    <div class="bg-white shadow-md rounded-lg p-6">
-        <p class="text-gray-600 mb-4">By {{ workbook.author.name }}</p>
-        <p class="text-gray-600 mb-4">Subject: {{ workbook.subject.name }}</p>
-        {% if workbook.is_paid %}
-        <p class="text-red-600 mb-4">This is a paid workbook</p>
-        {% else %}
-        <p class="text-green-600 mb-4">This is a free workbook</p>
-        {% endif %}
-        <h2 class="text-2xl font-semibold mt-6 mb-4">Chapters and Quizzes</h2>
-        <ul class="space-y-4">
+<div class="container mx-auto px-4 py-8">
+    <!-- Header Section -->
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8">
+        <div class="lg:flex-shrink-0">
+            <img src="{{ workbook.image.url }}" alt="{{ workbook.title }}" class="rounded-lg w-full lg:w-64 h-auto object-cover">
+        </div>
+        <div class="mt-6 lg:mt-0 lg:ml-8 flex-grow">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ workbook.title }}</h1>
+            <p class="text-gray-700 text-lg mb-2">By {{ workbook.author.name }}</p>
+            <p class="text-gray-700 text-lg mb-2">Subject: {{ workbook.subject.name }}</p>
+            {% if workbook.is_paid %}
+            <p class="text-red-600 text-lg font-semibold mb-4">This is a paid workbook</p>
+            {% else %}
+            <p class="text-green-600 text-lg font-semibold mb-4">This is a free workbook</p>
+            {% endif %}
+            <!-- Archive Button -->
+            <button id="archiveBtn" 
+                    data-type="workbook" 
+                    data-id="{{ workbook.id }}"
+                    class="bg-gray-300 hover:bg-blue-600  py-2 px-6 rounded-full transition duration-300 mt-4">
+                {% if is_archived %}
+                    Unarchive
+                {% else %}
+                    Archive
+                {% endif %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="bg-gray-100 rounded-lg p-6">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Chapters and Quizzes</h2>
+        <ul class="space-y-8">
             {% for chapter in workbook.chapter_set.all %}
-            <li>
-                <h3 class="text-xl font-semibold mb-2">{{ chapter.title }}</h3>
-                <ul class="space-y-2 ml-4">
+            <li class="bg-white rounded-lg p-4 hover:bg-gray-50 transition duration-300">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">{{ chapter.title }}</h3>
+                <ul class="space-y-3 ml-4">
                     {% for quiz in chapter.quiz_set.all %}
-                    <li>
-                        <a href="{% url 'core:quiz' quiz.id %}" class="text-blue-600 hover:underline">{{ quiz.title }}</a>
+                    <li class="flex items-center justify-between">
+                        <div>
+                            <span class="text-blue-600 font-medium">{{ quiz.title }}</span>
+                            <span class="text-sm text-gray-500 ml-2">({{ forloop.counter|add:quiz.id|divisibleby:4|yesno:"5 mins,10 mins,15 mins,20 mins" }})</span>
+                        </div>
+                        <a href="{% url 'core:quiz' quiz.id %}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-4 rounded-full text-sm transition duration-300">
+                            Start Quiz
+                        </a>
                     </li>
                     {% empty %}
-                    <li>No quizzes available for this chapter.</li>
+                    <li class="text-gray-500">No quizzes available for this chapter.</li>
                     {% endfor %}
                 </ul>
             </li>
             {% empty %}
-            <li>No chapters available for this workbook.</li>
+            <li class="text-gray-500">No chapters available for this workbook.</li>
             {% endfor %}
         </ul>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#archiveBtn').click(function() {
+            var btn = $(this);
+            $.ajax({
+                url: '{% url "core:toggle_archive" %}',
+                type: 'POST',
+                data: {
+                    'type': btn.data('type'),
+                    'id': btn.data('id'),
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        if (response.is_archived) {
+                            btn.text('Unarchive');
+                        } else {
+                            btn.text('Archive');
+                        }
+                    }
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

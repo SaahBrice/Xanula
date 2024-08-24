@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.db import transaction
-from .models import Author, ExplanationRequest, Notification, PastExamPaper, PastExamQuestion, Subject, Workbook, Chapter, Quiz, Question, Choice, QuizAttempt, QuestionResponse
+from .models import ArchivedItem, Author, ExplanationRequest, Notification, PastExamPaper, PastExamQuestion, Sponsor, Subject, Workbook, Chapter, Quiz, Question, Choice, QuizAttempt, QuestionResponse
 from django import forms
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.views.decorators.http import require_POST
@@ -18,6 +18,11 @@ from .models import QuestionResponse
 from django.db.models.functions import TruncDate
 from django.db.models import Sum, Count, Avg
 from django.template.loader import render_to_string
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
+from django.utils import timezone
+from django.contrib import messages
+
 
 
 class LandingPageView(TemplateView):
@@ -40,6 +45,7 @@ class StudentHomeView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['recent_exam_papers'] = PastExamPaper.objects.order_by('-id')[:5]  # Get 5 most recent exam papers
         context['recent_explanation_requests'] = ExplanationRequest.objects.filter(user=self.request.user).order_by('-created_at')[:5]
+        context['sponsors'] = Sponsor.objects.filter(expiry_date__gt=timezone.now()).order_by('-created_at')[:3]
         return context
 
 
@@ -60,6 +66,10 @@ class WorkbookDetailView(LoginRequiredMixin, DetailView):
     def get_queryset(self):
         return super().get_queryset().select_related('subject', 'author').prefetch_related('chapter_set')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_archived'] = self.object.is_archived_by(self.request.user)
+        return context
 
 
 class QuizView(LoginRequiredMixin, FormView):
@@ -288,16 +298,22 @@ class PastExamPaperDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'exam_paper'
 
     def get(self, request, *args, **kwargs):
-        exam_paper = self.get_object()
-        if exam_paper.is_paid and not request.user.has_active_subscription():
+        self.object = self.get_object()
+        if self.object.is_paid and not request.user.has_active_subscription():
             return HttpResponseForbidden("You must have an active subscription to access this content.")
-        return super().get(request, *args, **kwargs)
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_archived'] = self.object.is_archived_by(self.request.user)
+        return context
 
 
 class DownloadSolutionView(LoginRequiredMixin, View):
     def get(self, request, question_id):
         question = get_object_or_404(PastExamQuestion, id=question_id)
-        if question.exam_paper.is_paid and not request.user.request.user.has_active_subscription():
+        if question.exam_paper.is_paid and not request.user.has_active_subscription():
             return HttpResponseForbidden("You must have an active subscription to access this content.")
         
         response = HttpResponse(question.written_solution, content_type='application/pdf')
@@ -374,3 +390,96 @@ def get_recent_notifications(request):
     ).count()
 
     return JsonResponse({'html': html, 'count': new_count})
+
+
+
+@login_required
+def toggle_archive(request):
+    item_type = request.POST.get('type')
+    item_id = request.POST.get('id')
+    
+    if item_type == 'workbook':
+        model = Workbook
+    elif item_type == 'exam_paper':
+        model = PastExamPaper
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid item type'})
+    
+    content_type = ContentType.objects.get_for_model(model)
+    
+    try:
+        item = model.objects.get(id=item_id)
+    except model.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Item not found'})
+    
+    archived_item, created = ArchivedItem.objects.get_or_create(
+        user=request.user,
+        content_type=content_type,
+        object_id=item_id
+    )
+    
+    if not created:
+        archived_item.delete()
+        is_archived = False
+    else:
+        is_archived = True
+    
+    return JsonResponse({'status': 'success', 'is_archived': is_archived})
+
+
+class ArchivedItemsView(LoginRequiredMixin, ListView):
+    template_name = 'core/archived_items.html'
+    context_object_name = 'archived_items'
+
+    def get_queryset(self):
+        return ArchivedItem.objects.filter(user=self.request.user).select_related('content_type').order_by('-archived_at')
+
+
+class SearchView(ListView):
+    template_name = 'core/search.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        content_type = self.request.GET.get('type', 'all')
+
+        if query:
+            if content_type == 'workbook':
+                return Workbook.objects.filter(
+                    Q(title__icontains=query) | 
+                    Q(subject__name__icontains=query) |
+                    Q(author__name__icontains=query)
+                )
+            elif content_type == 'exam_paper':
+                return PastExamPaper.objects.filter(
+                    Q(name__icontains=query) | 
+                    Q(subject__name__icontains=query) |
+                    Q(year__icontains=query)
+                )
+            else:
+                workbooks = Workbook.objects.filter(
+                    Q(title__icontains=query) | 
+                    Q(subject__name__icontains=query) |
+                    Q(author__name__icontains=query)
+                )
+                exam_papers = PastExamPaper.objects.filter(
+                    Q(name__icontains=query) | 
+                    Q(subject__name__icontains=query) |
+                    Q(year__icontains=query)
+                )
+                return list(workbooks) + list(exam_papers)
+        return []
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['query'] = self.request.GET.get('q', '')
+        context['content_type'] = self.request.GET.get('type', 'all')
+        return context
+
+
+class SubscriptionRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if self.object.is_paid and not request.user.has_active_subscription():
+            messages.warning(request, "This content requires an active subscription. Please subscribe to access.")
+            return redirect('subscriptions:subscription_plan_list')
+        return super().dispatch(request, *args, **kwargs)

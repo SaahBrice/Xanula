@@ -2,79 +2,187 @@
 
 {% block title %}Xanula - Student Home{% endblock %}
 
-
-
 {% block content %}
-
-
-
-
-<div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold mb-6">Welcome, {{ user.username }}!</h1>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for subject in subjects %}
-        <div class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold mb-4">{{ subject.name }}</h2>
-            <ul class="space-y-2">
-                {% for workbook in subject.workbook_set.all|slice:":3" %}
-                <li><a href="{% url 'core:workbook_detail' workbook.id %}" class="text-blue-600 hover:underline">{{ workbook.title }}</a></li>
-                {% endfor %}
-            </ul>
-            {% if subject.workbook_set.count > 3 %}
-            <a href="{% url 'core:workbook_list' subject.id %}" class="mt-4 inline-block text-sm text-blue-600 hover:underline">See all workbooks</a>
-            {% endif %}
-        </div>
-        {% empty %}
-        <p>No subjects available.</p>
-        {% endfor %}
-    </div>
-
-    <!-- New section for recent explanation requests -->
-    <h2 class="text-2xl font-semibold mb-4">Recent Explanation Requests</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {% for request in recent_explanation_requests %}
-            <div class="bg-white shadow-md rounded-lg p-6">
-                <h3 class="text-xl font-semibold mb-2">Request for {{ request.question.exam_paper.name }}</h3>
-                <p class="mb-2">Status: 
-                    {% if request.status == 'pending' %}
-                        <span class="text-yellow-600">Pending</span>
-                    {% else %}
-                        <span class="text-green-600">Answered</span>
-                    {% endif %}
-                </p>
-                <p class="mb-2">Submitted: {{ request.created_at|date:"F j, Y" }}</p>
-                <a href="{% url 'core:explanation_request_detail' request.pk %}" class="mt-2 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    View Details
-                </a>
+<div class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left Panel (Main Content Area) -->
+    <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Tab Bar for Switching Between Exam Papers and Workbooks -->
+        <div>
+            <div class="flex space-x-4 border-b mb-4">
+                <button id="workbooks-tab" class="px-4 py-2 text-blue-600 font-semibold border-b-2 border-blue-600">Workbooks</button>
+                <button id="exam-papers-tab" class="px-4 py-2 text-gray-600 hover:text-blue-600">Exam Papers</button>
             </div>
-        {% empty %}
-            <p>No recent explanation requests.</p>
-        {% endfor %}
-    </div>
 
-    <h2 class="text-2xl font-semibold mb-4">Recently Added Exam Papers</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {% for paper in recent_exam_papers %}
-            <div class="bg-white shadow-md rounded-lg p-6">
-                <h3 class="text-xl font-semibold mb-2">{{ paper.name }}</h3>
-                <p class="mb-2">Subject: {{ paper.subject.name }}</p>
-                <p class="mb-2">Year: {{ paper.year }}</p>
-                {% if paper.is_paid %}
-                    <p class="text-red-500 mb-2">Paid Content</p>
+            <!-- Workbooks Section -->
+            <div id="workbooks-section">
+                <h2 class="text-2xl font-bold mb-4">Workbooks</h2>
+                {% for subject in subjects %}
+                {% if subject.workbook_set.exists %}  <!-- Check if subject has workbooks -->
+                <div class="mb-12">
+                    <!-- Subject Title with Decorative Line -->
+                    <div class="flex items-center mb-8">
+                        <h3 class=" font-extrabold text-gray-900">{{ subject.name }}</h3>
+                        <div class="flex-grow ml-4 border-t-2 border-blue-300"></div>
+                    </div>
+                
+                    <!-- Workbooks Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                        {% for workbook in subject.workbook_set.all %}
+                        <div class="relative group bg-white rounded-xl overflow-hidden  hover:shadow-2xl transition-shadow duration-300">
+                            <div class="relative">
+                                <!-- Image with Zoom Effect -->
+                                <img src="{{ workbook.image.url }}" alt="{{ workbook.title }}" class="w-full h-60 object-cover transition-transform transform group-hover:scale-110 duration-300">
+                                <!-- Overlay with Gradient and Text -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70 group-hover:opacity-80 transition-opacity duration-300"></div>
+                                <h4 class="absolute bottom-4 left-4 text-white text-2xl font-bold z-10">{{ workbook.title }}</h4>
+                            </div>
+                            <!-- Content with Author and Floating Action Button -->
+                            <div class="p-6">
+                                <p class="text-gray-500 italic mb-2">By {{ workbook.author }}</p> <!-- Author's name -->
+                                <p class="text-gray-700 mb-4 line-clamp-3">{{ workbook.description }}</p> <!-- Description -->
+                                <a href="{% url 'core:workbook_detail' workbook.id %}" class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-800 text-white font-semibold py-2 px-5 rounded-full transform transition-transform duration-300 group-hover:translate-y-0.5">
+                                    View Workbook
+                                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
                 {% endif %}
-                <a href="{% url 'core:past_exam_paper_detail' paper.pk %}" class="mt-2 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    View Paper
-                </a>
+            {% endfor %}
+            
             </div>
-        {% empty %}
-            <p>No recent exam papers available.</p>
-        {% endfor %}
+
+            <!-- Exam Papers Section -->
+            <div id="exam-papers-section" class="hidden">
+                <h2 class="text-2xl font-bold mb-4">Recently Added Exam Papers</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for paper in recent_exam_papers %}
+                    <div class="relative group bg-white rounded-xl overflow-hidden hover:shadow-2xl transition-transform transform hover:scale-105 duration-300">
+                        <div class="relative">
+                            <!-- Image with Zoom Effect -->
+                            <img src="{{ paper.image.url }}" alt="{{ paper.name }}" class="w-full h-56 object-cover transition-transform transform group-hover:scale-110 duration-300">
+                            <!-- Overlay with Gradient and Text -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70 group-hover:opacity-80 transition-opacity duration-300"></div>
+                            <h4 class="absolute bottom-4 left-4 text-white text-2xl font-bold z-10">{{ paper.name }}</h4>
+                        </div>
+                        <!-- Content with Additional Information -->
+                        <div class="p-6">
+                            <p class="text-gray-700 mb-2">Subject: <span class="font-semibold">{{ paper.subject.name }}</span></p>
+                            <p class="text-gray-700 mb-2">Year: <span class="font-semibold">{{ paper.year }}</span></p>
+                            {% if paper.is_paid %}
+                            <p class="text-red-600 font-semibold mb-4">Paid Content</p>
+                            {% endif %}
+                            <!-- Floating Action Button -->
+                            <a href="{% url 'core:past_exam_paper_detail' paper.pk %}" class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-800 text-white font-semibold py-2 px-5 rounded-full shadow-lg transform transition-transform duration-300 group-hover:translate-y-0.5">
+                                View Paper
+                                <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
     </div>
 
-    <div class="text-center">
-        <a href="{% url 'core:past_exam_paper_list' %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-            See All Exam Papers
-        </a>
+    <!-- Right Panel (Sidebar) -->
+    <div class="space-y-8 sticky top-0">
+        <!-- Sponsors Section -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">Our Sponsors</h2>
+            <div class="space-y-4">
+                {% for sponsor in sponsors %}
+                <div class="bg-white rounded-lg overflow-hidden flex items-center p-4 transition-transform transform hover:scale-105 duration-300">
+                    <!-- Sponsor Image -->
+                    <img src="{{ sponsor.image.url }}" alt="{{ sponsor.title }}" class="w-16 h-16 object-contain mr-4">
+        
+                    <!-- Sponsor Details -->
+                    <div class="flex-grow">
+                        <h4 class="text-lg font-semibold text-gray-900">{{ sponsor.title }}</h4>
+                        <p class="text-gray-600">{{ sponsor.description|truncatewords:15 }}</p> <!-- Limit description to 15 words -->
+                    </div>
+        
+                    <!-- Call to Action -->
+                    <a href="{{ sponsor.link }}" target="_blank" class="ml-4 inline-block bg-gray-300 hover:bg-green-600 font-semibold py-1 px-2 rounded-full text-sm transition-colors duration-300">
+                    more
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        
+        
+
+
+        <!-- Subjects List -->
+        <div>
+            <h2 class="text-2xl font-bold mb-4">Subjects</h2>
+            <div class="flex flex-wrap gap-2">
+                {% for subject in subjects %}
+                <a href=" {% url "core:search" %}" class="inline-block bg-gray-200 hover:bg-gray-00 text-gray-800 px-3 py-1 rounded-full text-sm transition">
+                    #{{ subject.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Recent Explanation Requests -->
+        <div>
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Recent Explanation Requests</h2>
+            <div class="space-y-4">
+                {% for request in recent_explanation_requests %}
+                <div class="bg-white shadow-md rounded-lg p-4 flex items-center transition-transform transform hover:scale-105 duration-300">
+                    <!-- Left Section: Request Details -->
+                    <div class="flex-grow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-1">Request for {{ request.question.exam_paper.name }}</h3>
+                        <p class="text-sm text-gray-600 mb-1">Status: 
+                            {% if request.status == 'pending' %}
+                            <span class="text-yellow-600 font-medium">Pending</span>
+                            {% else %}
+                            <span class="text-green-600 font-medium">Answered</span>
+                            {% endif %}
+                        </p>
+                        <p class="text-sm text-gray-500">Submitted: {{ request.created_at|date:"F j, Y" }}</p>
+                    </div>
+        
+                    <!-- Right Section: Action Button -->
+                    <a href="{% url 'core:explanation_request_detail' request.pk %}" class="ml-4 inline-block bg-gray-300 hover:bg-green-600  font-semibold py-2 px-4 rounded-full text-sm transition-colors duration-300">
+                        View Details
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        
+        
     </div>
 </div>
+
+<!-- JavaScript to Handle Tab Switching -->
+<script>
+    document.getElementById('workbooks-tab').addEventListener('click', function() {
+        document.getElementById('workbooks-section').classList.remove('hidden');
+        document.getElementById('exam-papers-section').classList.add('hidden');
+        this.classList.add('border-blue-600', 'text-blue-600');
+        document.getElementById('exam-papers-tab').classList.remove('border-blue-600', 'text-blue-600');
+    });
+
+    document.getElementById('exam-papers-tab').addEventListener('click', function() {
+        document.getElementById('exam-papers-section').classList.remove('hidden');
+        document.getElementById('workbooks-section').classList.add('hidden');
+        this.classList.add('border-blue-600', 'text-blue-600');
+        document.getElementById('workbooks-tab').classList.remove('border-blue-600', 'text-blue-600');
+    });
+</script>
 {% endblock %}

@@ -2,38 +2,51 @@
 {% load youtube_filters %}
 
 {% block content %}
-<div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold mb-6">{{ exam_paper.name }}</h1>
-    <p>Subject: {{ exam_paper.subject.name }}</p>
-    <p>Year: {{ exam_paper.year }}</p>
+<div class="container mx-auto px-4 py-8">
+    <!-- Exam Paper Details -->
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-6">{{ exam_paper.name }}</h1>
+    <p class="text-lg text-gray-700">Subject: {{ exam_paper.subject.name }}</p>
+    <p class="text-lg text-gray-700 mb-8">Year: {{ exam_paper.year }}</p>
 
-    <div class="flex flex-col md:flex-row mt-6 space-y-6 md:space-y-0 md:space-x-6">
+    <div class="flex flex-col md:flex-row mt-6 space-y-8 md:space-y-0 md:space-x-8">
         <!-- PDF Viewer Column -->
-        <div class="w-full md:w-2/3">
-            <h2 class="text-2xl font-bold mb-4">Exam Paper</h2>
-            <div id="pdf-viewer" class="border border-gray-300" style="height: 800px; overflow-y: auto;"></div>
-            <div class="mt-4 flex justify-between">
-                <button id="prev" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Previous</button>
-                <span id="page_num"></span>
-                <button id="next" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Next</button>
+        <div class="w-full md:w-2/3 bg-white shadow-lg rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Exam Paper</h2>
+                <button id="archiveBtn" 
+                        data-type="exam_paper" 
+                        data-id="{{ exam_paper.id }}"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+                    {% if is_archived %}
+                        Unarchive
+                    {% else %}
+                        Archive
+                    {% endif %}
+                </button>
+            </div>
+            <div id="pdf-viewer" class="border border-gray-300 rounded-lg overflow-y-auto" style="height: 800px;"></div>
+            <div class="mt-4 flex justify-between items-center">
+                <button id="prev" class="bg-gray-300 hover:bg-gray-400 text-gray-500 font-semibold py-2 px-4 rounded-full">Previous</button>
+                <span id="page_num" class="text-gray-700"></span>
+                <button id="next" class="bg-gray-300 hover:bg-gray-400 text-gray-500 font-semibold py-2 px-4 rounded-full">Next</button>
             </div>
         </div>
 
         <!-- Solutions Column -->
-        <div class="w-full md:w-1/3">
-            <h2 class="text-2xl font-bold mb-4">Solutions</h2>
+        <div class="w-full md:w-1/3 space-y-8">
+            <h2 class="text-2xl font-extrabold text-gray-800">Solutions</h2>
             {% for question in exam_paper.pastexamquestion_set.all %}
-                <div class="mb-6 p-4 bg-gray-100 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-2">Question {{ question.question_number }}</h3>
-                    <div class="aspect-w-16 aspect-h-9 mb-2">
-                        <iframe src="https://www.youtube.com/embed/{{ question.video_solution_url|youtube_video_id }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <div class="bg-white rounded-lg p-6 border border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Question {{ question.question_number }}</h3>
+                    <div class="relative pb-9/16 mb-4">
+                        <iframe class="inset-4 w-full h-full rounded-lg" src="https://www.youtube.com/embed/{{ question.video_solution_url|youtube_video_id }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
-                    <div class="flex flex-col space-y-2 mt-2">
-                        <a href="{% url 'core:download_solution' question.id %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center">
-                            Download Written Solution
+                    <div class="flex justify-between space-x-4 mt-4">
+                        <a href="{% url 'core:download_solution' question.id %}" class="bg-gray-300 hover:bg-gray-400 text-gray-500 text-sm py-2 px-4 rounded-full w-1/2 text-center">
+                            Download PDF
                         </a>
-                        <a href="{% url 'core:explanation_request' question.id %}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded text-center">
-                            Request Further Explanation
+                        <a href="{% url 'core:explanation_request' question.id %}" class="bg-gray-300 hover:bg-gray-400 text-gray-500 text-sm py-2 px-4 rounded-full w-1/2 text-center">
+                            Request Help
                         </a>
                     </div>
                 </div>
@@ -42,8 +55,9 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // PDF.js viewer
+    // PDF.js viewer setup
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
 
     var url = '{{ exam_paper.pdf_file.url }}';
@@ -113,6 +127,32 @@
         pdfDoc = pdfDoc_;
         document.getElementById('page_num').textContent = pageNum + ' / ' + pdfDoc.numPages;
         renderPage(pageNum);
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#archiveBtn').click(function() {
+            var btn = $(this);
+            $.ajax({
+                url: '{% url "core:toggle_archive" %}',
+                type: 'POST',
+                data: {
+                    'type': btn.data('type'),
+                    'id': btn.data('id'),
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        if (response.is_archived) {
+                            btn.text('Unarchive');
+                        } else {
+                            btn.text('Archive');
+                        }
+                    }
+                }
+            });
+        });
     });
 </script>
 {% endblock %}

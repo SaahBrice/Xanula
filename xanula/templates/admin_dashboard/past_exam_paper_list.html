@@ -12,6 +12,7 @@
     <table class="text-left w-full border-collapse">
         <thead>
             <tr>
+                <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Image</th>
                 <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Name</th>
                 <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Subject</th>
                 <th class="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light">Year</th>
@@ -22,6 +23,9 @@
         <tbody>
             {% for paper in exam_papers %}
             <tr class="hover:bg-grey-lighter">
+                <td class="py-4 px-6 border-b border-grey-light">
+                    <img src="{{ paper.image.url }}" alt="{{ paper.name }}" class="w-8 h-8 object-cover rounded">
+                </td>
                 <td class="py-4 px-6 border-b border-grey-light">{{ paper.name }}</td>
                 <td class="py-4 px-6 border-b border-grey-light">{{ paper.subject }}</td>
                 <td class="py-4 px-6 border-b border-grey-light">{{ paper.year }}</td>

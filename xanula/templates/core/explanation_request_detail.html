@@ -1,28 +1,30 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold mb-6">Explanation Request</h1>
-    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <p class="mb-2"><strong>Question:</strong> {{ request.question }}</p>
-        <p class="mb-2"><strong>Your Request:</strong> {{ request.request_text }}</p>
-        <p class="mb-2"><strong>Submitted:</strong> {{ request.created_at }}</p>
-        <p class="mb-2"><strong>Status:</strong> 
-            {% if request.status == 'pending' %}
-                <span class="text-yellow-600">Pending</span>
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-6">Explanation Request</h1>
+        <div class="bg-white rounded-lg p-6 mb-8">
+            <p class="mb-4 text-lg"><strong>Question:</strong> {{ request.question }}</p>
+            <p class="mb-4 text-lg"><strong>Your Request:</strong> {{ request.request_text }}</p>
+            <p class="mb-4 text-lg"><strong>Submitted:</strong> {{ request.created_at }}</p>
+            <p class="mb-4 text-lg"><strong>Status:</strong> 
+                {% if request.status == 'pending' %}
+                    <span class="text-yellow-600 font-semibold">Pending</span>
+                {% else %}
+                    <span class="text-green-600 font-semibold">Answered</span>
+                {% endif %}
+            </p>
+            {% if request.admin_response %}
+                <p class="mb-4 text-lg"><strong>Admin Response:</strong> {{ request.admin_response }}</p>
+                <p class="mb-4 text-lg"><strong>Responded At:</strong> {{ request.responded_at }}</p>
             {% else %}
-                <span class="text-green-600">Answered</span>
+                <p class="text-yellow-600 font-semibold">Waiting for admin response...</p>
             {% endif %}
-        </p>
-        {% if request.admin_response %}
-            <p class="mb-2"><strong>Admin Response:</strong> {{ request.admin_response }}</p>
-            <p class="mb-2"><strong>Responded At:</strong> {{ request.responded_at }}</p>
-        {% else %}
-            <p class="text-yellow-600">Waiting for admin response...</p>
-        {% endif %}
+        </div>
+        <a href="{% url 'core:past_exam_paper_detail' request.question.exam_paper.id %}" class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full text-center">
+            Back to Exam Paper
+        </a>
     </div>
-    <a href="{% url 'core:past_exam_paper_detail' request.question.exam_paper.id %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        Back to Exam Paper
-    </a>
 </div>
 {% endblock %}

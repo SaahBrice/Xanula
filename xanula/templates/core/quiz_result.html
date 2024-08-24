@@ -4,42 +4,53 @@
 {% block title %}Xanula - Quiz Results{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4" x-data="quizResult">
-    <h1 class="text-3xl font-bold mb-6">Quiz Results: {{ attempt.quiz.title }}</h1>
-    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-        <p class="text-xl mb-2">Score: {{ attempt.score|floatformat:2 }}%</p>
-        <p>Date Attempted: {{ attempt.date_attempted }}</p>
+<div class="container mx-auto px-4 py-12" x-data="quizResult">
+    <h1 class="text-2xl font-extrabold text-center text-gray-900 mb-10">Quiz Results: {{ attempt.quiz.title }}</h1>
+    
+    <div class="bg-gray-100 rounded-lg p-8 mb-8">
+        <div class="text-center text-2xl font-bold text-gray-800 mb-4">
+            Score: <span class="text-blue-600">{{ attempt.score|floatformat:2 }}%</span>
+        </div>
+        <div class="text-center text-gray-600">
+            Date Attempted: <span class="font-medium">{{ attempt.date_attempted }}</span>
+        </div>
     </div>
-    <div class="space-y-6">
+
+    <div class="space-y-8">
         {% for response in attempt.questionresponse_set.all %}
-        <div class="bg-white shadow-md rounded-lg p-6">
-            <p class="font-semibold mb-4">{{ response.question.text }}</p>
-            <ul class="space-y-2 mb-4">
+        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+            <p class="text-xl font-semibold text-gray-800 mb-4">{{ forloop.counter }}) {{ response.question.text }}</p>
+            <ul class="space-y-3">
                 {% for choice in response.question.choice_set.all %}
                 <li class="flex items-center">
-                    <span class="mr-2" x-html="getIcon('{{ choice.id }}', '{{ response.selected_choice.id }}', {{ choice.is_correct|lower }})"></span>
-                    {{ choice.text }}
+                    <span class="mr-3" x-html="getIcon('{{ choice.id }}', '{{ response.selected_choice.id }}', {{ choice.is_correct|lower }})"></span>
+                    <span class="text-gray-700">{{ choice.text }}</span>
                 </li>
                 {% endfor %}
             </ul>
-            <button @click="getExplanation('{{ response.id }}')" 
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
-                    :disabled="isLoading['{{ response.id }}']">
-                <span x-show="!isLoading['{{ response.id }}']">I don't understand</span>
-                <span x-show="isLoading['{{ response.id }}']" class="flex items-center">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Loading...
-                </span>
-            </button>
+            <div class="mt-6 text-left">
+                <button @click="getExplanation('{{ response.id }}')" 
+                        class="bg-gray-200 hover:bg-blue-700 text-gray-400 font-semibold py-2 px-6 text-xs rounded-full transition duration-300"
+                        :disabled="isLoading['{{ response.id }}']">
+                    <span x-show="!isLoading['{{ response.id }}']"><i class="fa-solid fa-robot"></i> Explanation</span>
+                    <span x-show="isLoading['{{ response.id }}']" class="flex items-center justify-center">
+                        <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                    </span>
+                </button>
+            </div>
         </div>
         {% endfor %}
     </div>
-    <a href="{% url 'core:workbook_detail' attempt.quiz.chapter.workbook.id %}" class="mt-6 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        Back to Workbook
-    </a>
+
+    <div class="mt-12 text-center">
+        <a href="{% url 'core:workbook_detail' attempt.quiz.chapter.workbook.id %}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full transition duration-300">
+            Back to Workbook
+        </a>
+    </div>
 
     <!-- Explanation Modal -->
     <div x-show="showModal" 
@@ -54,23 +65,17 @@
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                Explanation
-                            </h3>
-                            <div class="mt-2">
-                                <p class="text-sm text-gray-500" x-text="explanation"></p>
-                            </div>
-                        </div>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-6 py-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Explanation</h3>
+                    <div class="mt-2">
+                        <p class=" text-gray-700" x-text="explanation"></p>
                     </div>
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     <button @click="showModal = false" 
                             type="button" 
-                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            class="w-full inline-flex justify-center rounded-full text-sm border border-gray-300 px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 sm:ml-3 sm:w-auto sm:text-sm">
                         Close
                     </button>
                 </div>

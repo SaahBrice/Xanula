@@ -1,5 +1,5 @@
 from django import forms
-from core.models import ExplanationRequest, Notification, Workbook, Subject, PastExamPaper
+from core.models import ExplanationRequest, Notification, Quiz, Workbook, Subject, PastExamPaper
 from subscriptions.models import Subscription, SubscriptionPlan
 from django.contrib.auth import get_user_model
 
@@ -8,7 +8,11 @@ User = get_user_model()
 class WorkbookForm(forms.ModelForm):
     class Meta:
         model = Workbook
-        fields = ['title', 'subject', 'author', 'is_paid']
+        fields = ['title', 'subject', 'author', 'image', 'is_paid']
+        widgets = {
+            'image': forms.FileInput(attrs={'accept': 'image/*'}),
+        }
+
 
 class SubjectForm(forms.ModelForm):
     class Meta:
@@ -18,8 +22,11 @@ class SubjectForm(forms.ModelForm):
 class PastExamPaperForm(forms.ModelForm):
     class Meta:
         model = PastExamPaper
-        fields = ['name', 'subject', 'year', 'pdf_file', 'is_paid']
-
+        fields = ['name', 'subject', 'image', 'year', 'pdf_file', 'is_paid']
+        widgets = {
+            'image': forms.FileInput(attrs={'accept': 'image/*'}),
+        }
+        
 class SubscriptionForm(forms.ModelForm):
     class Meta:
         model = Subscription
@@ -66,3 +73,4 @@ class NotificationForm(forms.ModelForm):
             raise forms.ValidationError("You can't select a recipient and send to all students at the same time.")
 
         return cleaned_data
+    

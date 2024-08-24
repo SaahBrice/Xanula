@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+    {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,16 @@
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/js/all.min.js" crossorigin="anonymous"></script>
+    <!-- Intersection Observer Polyfill for Lazy Loading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.12.1/polyfill.min.js"></script>
+    <!-- Include Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <link rel="icon" href="{% static "icon.png" %}" type="image/png">
     {% block extra_css %}{% endblock extra_css %}
     <script>
         document.addEventListener('alpine:init', () => {
@@ -19,41 +29,83 @@
     </script>
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-white  p-4" x-data="{ mobileMenuOpen: false }">
+    <nav class="bg-white  p-4 w-full " x-data="{ mobileMenuOpen: false }">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="{% url 'core:landing' %}" class="text-2xl font-bold text-blue-400">Xanula</a>
-            <div class="hidden md:flex items-center space-x-4">
+            <a href="{% url 'core:landing' %}" class="text-2xl font-bold text-blue-400"><img src="{% static "logoXan.png" %}" alt="Xanula Logo" class="h-8 inline-block"></a>
+
+            <div class="hidden md:flex items-center space-x-8">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'core:student_home' %}">Home</a>
-                    <a href="{% url 'subscriptions:subscription_list' %}">Manage Subscriptions</a>
-                    <div x-data="notificationComponent()">
-                        <button @click="toggleNotifications" class="relative focus:outline-none">
-                            <i class="fas fa-bell"></i>
-                            <span x-show="unreadCount > 0" 
-                                  x-text="unreadCount"
-                                  class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                            </span>
-                        </button>
-                        <div x-show="showNotifications" 
-                             @click.away="showNotifications = false" 
-                             class="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg overflow-hidden z-20" 
-                             style="display: none;">
-                            <div x-html="notificationsHtml"></div>
-                        </div>
-                    </div>
-                    <a href="{% url 'core:student_home' %}" class="relative">
+                <a href="{% url 'core:search' %}" class="relative text-gray-600 group hover:text-blue-600 transition duration-300">
+                    <i class="fas fa-search"></i>
+                    <span class="tooltip-text hidden group-hover:block absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                        Search
+                    </span>
+                </a>
+                
+                <a class="relative text-gray-600 group hover:text-blue-600 transition duration-300" href="{% url 'core:student_home' %}">
+                    <i class="fas fa-home"></i>
+                    <span class="tooltip-text hidden group-hover:block absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                        Home
+                    </span>
+                </a>
+                
+                <a class=" text-gray-600 relative group hover:text-blue-600 transition duration-300" href="{% url 'core:archived_items' %}">
+                    <i class="fas fa-book"></i>
+                    <span class="tooltip-text hidden group-hover:block absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                        Archived documents
+                    </span>
+                </a>
+                
+                <a class="relative text-gray-600 group hover:text-blue-600 transition duration-300" href="{% url 'subscriptions:subscription_list' %}">
+                    <i class="fas fa-money-bill"></i>
+                    <span class="tooltip-text hidden group-hover:block absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                        Subscriptions
+                    </span>
+                </a>
+                
+                <div x-data="notificationComponent()" class="relative group">
+                    <button @click="toggleNotifications" class="relative focus:outline-none">
+                        <i class="fas fa-bell text-gray-600 "></i>
+                        <span x-show="unreadCount > 0" 
+                              x-text="unreadCount"
+                              class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                        </span>
+                    </button>
+                    <span class="tooltip-text hidden group-hover:block absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
                         Notifications
-                        {% if notification_count > 0 %}
-                            <span class="absolute top-0 right-0 -mt-1 -mr-1 px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                                {{ notification_count }}
-                            </span>
-                        {% endif %}
-                    </a>
-                    <a href="{% url 'accounts:logout' %}">Logout</a>
+                    </span>
+                    <div x-show="showNotifications" 
+                         @click.away="showNotifications = false" 
+                         class="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg overflow-hidden z-20" 
+                         style="display: none;">
+                        <div x-html="notificationsHtml"></div>
+                    </div>
+                </div>
+                
+                <a href="{% url 'core:student_home' %}" class="relative group text-gray-600">
+                    <i class="fas fa-message"></i>
+                    {% if notification_count > 0 %}
+                        <span class="absolute top-0 right-0 -mt-1 -mr-1 px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                            {{ notification_count }}
+                        </span>
+                    {% endif %}
+                    <span class="tooltip-text hidden group-hover:block absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                        Messages
+                    </span>
+                </a>
+                
+                <a class="relative group hover:text-blue-600 transition duration-300 text-gray-600" href="{% url 'accounts:logout' %}">
+                    <i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i>
+                    <span class="tooltip-text hidden group-hover:block absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                        Logout
+                    </span>
+                </a>
+                
                 {% else %}
-                    <a href="{% url 'accounts:login' %}">Login</a>
-                    <a href="{% url 'accounts:signup' %}">Sign Up</a>
-                    <a href="{% url 'core:author_login' %}">Author</a>
+                <a class="hover:text-blue-600 transition duration-300"href="{% url 'core:author_login' %}">Author</a>
+                    <a class="hover:text-blue-600 transition duration-300" href="{% url 'accounts:login' %}">Login</a>
+                    <a class="text-sm bg-blue-600 text-white px-5 py-1 rounded-full hover:bg-blue-700 transition duration-300" href="{% url 'accounts:signup' %}">Sign Up</a>
+
                 {% endif %}
             </div>
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden focus:outline-none">
@@ -63,6 +115,9 @@
         <!-- Mobile menu -->
         <div x-show="mobileMenuOpen" class="md:hidden mt-2">
             {% if user.is_authenticated %}
+            <a href="{% url 'core:search' %}" class="text-white hover:text-gray-200">
+                <i class="fas fa-search"></i>
+            </a>
                 <a href="{% url 'core:student_home' %}" class="block py-2">Home</a>
                 <div x-data="notificationComponent()">
                     <button @click="toggleNotifications" class="relative focus:outline-none">
@@ -87,18 +142,19 @@
                         </span>
                     {% endif %}
                 </a>
+                <a href="{% url 'core:archived_items' %}" class="block py-2">Archive</a>
                 <a href="{% url 'subscriptions:subscription_list' %}" class="block py-2">Manage Subscriptions</a>
                 <a href="{% url 'accounts:logout' %}" class="block py-2">Logout</a>
             {% else %}
                 <a href="{% url 'accounts:login' %}" class="block py-2">Login</a>
-                <a href="{% url 'accounts:signup' %}" class="block py-2">Sign Up</a>
+                <a href="{% url 'accounts:signup' %}" class="block py-2 ">Sign Up</a>
                 <a href="{% url 'core:author_login' %}" class="block py-2">Author</a>
             {% endif %}
         </div>
     </nav>
-
+    {% if messages %}
     <main class="container mx-auto mt-8 p-4">
-        {% if messages %}
+
         <div class="messages mb-4">
             {% for message in messages %}
                 <div class="bg-{{ message.tags }}-100 border border-{{ message.tags }}-400 text-{{ message.tags }}-700 px-4 py-3 rounded relative" role="alert">
@@ -106,9 +162,60 @@
                 </div>
             {% endfor %}
         </div>
-        {% endif %}
-        {% block content %}{% endblock %}
+        
     </main>
+    {% endif %}
+    {% block content %}{% endblock %}
+
+
+
+    <!-- Footer -->
+    <footer id="contact" class="py-12 bg-gray-800 text-gray-400">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- About -->
+            <div>
+                <h3 class="text-xl font-semibold text-white mb-4">Xanula</h3>
+                <p>Leading the way in online education, providing high-quality courses.</p>
+            </div>
+            <!-- Links -->
+            <div>
+                <h4 class="text-lg font-semibold text-white mb-4">Quick Links</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-white transition duration-300">About Us</a></li>
+                    <li><a href="#" class="hover:text-white transition duration-300">Blog</a></li>
+                    <li><a href="#" class="hover:text-white transition duration-300">Support</a></li>
+                    <li><a href="#" class="hover:text-white transition duration-300">Contact</a></li>
+                </ul>
+            </div>
+            <!-- Resources -->
+            <div>
+                <h4 class="text-lg font-semibold text-white mb-4">Resources</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-white transition duration-300">FAQs</a></li>
+                    <li><a href="#" class="hover:text-white transition duration-300">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-white transition duration-300">Terms of Service</a></li>
+                    <li><a href="#" class="hover:text-white transition duration-300">Sitemap</a></li>
+                </ul>
+            </div>
+            <!-- Subscribe -->
+            <div>
+                <h4 class="text-lg font-semibold text-white mb-4">Subscribe to Our Newsletter</h4>
+                <p>Stay updated with the latest solutions and offers.</p>
+                <form class="mt-4 flex">
+                    <input type="email" placeholder="Enter your email" class="w-full px-4 py-2 rounded-l-md focus:outline-none">
+                    <button type="submit" class="bg-blue-600 px-4 py-2 rounded-r-full text-white hover:bg-blue-700 transition duration-300">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <div class="mt-12 border-t border-gray-700 pt-6 text-center">
+            <p>&copy; 2024 Xanula. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'});" class="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition duration-300">
+        <i class="fas fa-chevron-up"></i>
+    </button>
 
     <script>
         function notificationComponent() {
@@ -150,6 +257,7 @@
         </script>
 
     {% block extra_js %}{% endblock extra_js %}
+    
 </body>
 </html>
 

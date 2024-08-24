@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import ExplanationRequest, PastExamPaper, PastExamQuestion, Subject, Author, Workbook, Chapter, Quiz, Question, Choice
+from .models import ExplanationRequest, PastExamPaper, PastExamQuestion, Sponsor, Subject, Author, Workbook, Chapter, Quiz, Question, Choice
 
 
 
@@ -115,7 +115,16 @@ class PendingExplanationRequestFilter(admin.SimpleListFilter):
             return queryset.exclude(status='pending')
 
 
+@admin.register(Sponsor)
+class SponsorAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_active_admin', 'created_at', 'expiry_date')
+    list_filter = ('created_at', 'expiry_date')
+    search_fields = ('title', 'description')
 
+    def is_active_admin(self, obj):
+        return obj.is_active()
+    is_active_admin.boolean = True
+    is_active_admin.short_description = 'Is Active'
 
 admin.site.register(Subject)
 

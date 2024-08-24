@@ -7,7 +7,7 @@ client = anthropic.Client(api_key='sk-ant-api03-oB9j8KJSI83Df7iWljHRGBG4IbR2SSxm
 def get_ai_explanation(question, correct_answer, user_answer):
 
     prompt = (
-        "\n\nHuman: Explain briefly and simply why this answer to the question is correct, refering to me as you. Just give the explanation and nothing else. "
+        "\n\nHuman: Explain very basicly and simply why this answer to the question is correct, refering to me as you. the text reply you sent me should just be made up of the explanation. straight to the point "
         "Use very simple language:\n\n"
         f"Question: {question}\n"
         f"Correct answer: {correct_answer}\n"

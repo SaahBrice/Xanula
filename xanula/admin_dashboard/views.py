@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
-from core.models import ExplanationRequest, Notification, Workbook, Subject, PastExamPaper
+from core.models import Chapter, ExplanationRequest, Notification, Quiz, Workbook, Subject, PastExamPaper
 from subscriptions.models import Subscription, SubscriptionPlan
 from django.contrib import messages
 from .forms import ExplanationResponseForm, NotificationForm, PastExamPaperForm, SubjectForm, SubscriptionForm, SubscriptionPlanForm, UserForm, WorkbookForm
@@ -282,3 +282,4 @@ class NotificationListView(StaffRequiredMixin, ListView):
     template_name = 'admin_dashboard/notification_list.html'
     context_object_name = 'notifications'
     paginate_by = 20
+

@@ -6,11 +6,29 @@ from django.db.models.signals import post_save
 import string
 import random
 from accounts.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.utils import timezone
 
 
 def generate_unique_code():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     
+
+
+class ArchivedItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='archived_items')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    archived_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'content_type', 'object_id')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.content_object}"
+
 
 class Subject(models.Model):
     name = models.CharField(max_length=100)
@@ -30,6 +48,16 @@ class Workbook(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     is_paid = models.BooleanField(default=False)
+    image = models.ImageField(upload_to='workbook_images/', default='default_workbook.png')
+    archived_by = GenericRelation(ArchivedItem)
+
+
+    @property
+    def is_archived(self):
+        return self.archived_by.exists()
+
+    def is_archived_by(self, user):
+        return self.archived_by.filter(user=user).exists()
 
     def __str__(self):
         return self.title
@@ -106,6 +134,15 @@ class PastExamPaper(models.Model):
     year = models.PositiveIntegerField()
     pdf_file = models.FileField(upload_to='past_exam_papers/')
     is_paid = models.BooleanField(default=False)
+    image = models.ImageField(upload_to='past_exam_paper_images/', default='default_exam_paper.jpg')
+    archived_by = GenericRelation(ArchivedItem)
+
+    @property
+    def is_archived(self):
+        return self.archived_by.exists()
+
+    def is_archived_by(self, user):
+        return self.archived_by.filter(user=user).exists()
 
     def __str__(self):
         return f"{self.name} - {self.year}"
@@ -149,3 +186,24 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.recipient or 'All'}: {self.message[:50]}..."
+
+
+
+class Sponsor(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    image = models.ImageField(upload_to='sponsors/')
+    link = models.URLField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    expiry_date = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.expiry_date = timezone.now() + timedelta(days=180)  # 6 months
+        super().save(*args, **kwargs)
+
+    def is_active(self):
+        return timezone.now() <= self.expiry_date
+
+    def __str__(self):
+        return self.title

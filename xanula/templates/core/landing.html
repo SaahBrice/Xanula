@@ -1,18 +1,645 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}Welcome to Xanula{% endblock %}
 
+
+{% block extra_css %}
+<script>
+    particlesJS.load('particles-js', 'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.json', function() {
+        console.log('Particles.js config loaded');
+    });
+</script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        /* Parallax Effect */
+        .parallax {
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        /* Lazy Load Animations */
+        .lazy-loaded {
+            opacity: 1;
+            transition: opacity 0.5s ease-in;
+        }
+        .lazy-loading {
+            opacity: 0;
+        }
+        /* Tilt Effect for Cards */
+        .tilt-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .tilt-card:hover {
+            transform: translateY(-10px) scale(1.05);
+        }
+        /* Animated SVG */
+        @keyframes draw {
+            0% {
+                stroke-dasharray: 0, 100;
+            }
+            100% {
+                stroke-dasharray: 100, 0;
+            }
+        }
+        .animated-svg {
+            stroke-dasharray: 100, 100;
+            animation: draw 2s forwards;
+        }
+        /* Gradient Animation */
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        .gradient-bg {
+            background: linear-gradient(270deg, #006eff, #337aff, #339cff, #5876ff);
+            background-size: 1000% 1000%;
+
+        }
+        /* Scroll-Triggered Animations */
+        .slide-in {
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .slide-in.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        /* Floating Elements */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        /* Custom Cursor */
+        .custom-cursor {
+            cursor: url('https://example.com/custom-cursor.png'), auto;
+        }
+        /* Hover-Activated Image Effects */
+        .hover-image-effect img {
+            transition: transform 0.5s ease, filter 0.5s ease;
+        }
+        .hover-image-effect:hover img {
+            transform: scale(1.1);
+            filter: blur(2px) brightness(1.2);
+        }
+        /* Parallax Hover Effect */
+        .parallax-hover {
+            perspective: 1000px;
+        }
+        .parallax-hover-inner {
+            transition: transform 0.2s ease;
+            transform: rotateX(0deg) rotateY(0deg);
+        }
+        .parallax-hover:hover .parallax-hover-inner {
+            transform: rotateX(-10deg) rotateY(10deg);
+        }
+    </style>
+
+{% endblock extra_css %}
+
+
 {% block content %}
-    <div class="text-center">
-        <h1 class="text-4xl font-bold mb-4">Welcome to Xanula</h1>
-        <p class="mb-8">An interactive learning platform for students and educators</p>
-        <div>
-            <a href="{% url 'accounts:login' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">
-                Login
-            </a>
-            <a href="{% url 'accounts:signup' %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                Sign Up
-            </a>
+
+    <!-- Hero Section -->
+    <section class="relative pt-24 gradient-bg">
+        <!-- Particle Background -->
+        <div id="particles-js" class="absolute inset-0 w-full h-full"></div>
+        
+        <!-- Overlay -->
+
+    
+        <div class="relative max-w-7xl mx-auto px-6 py-40 flex flex-col items-center text-center text-white">
+            <h1 class="text-5xl font-extrabold mb-6 animate-fade-in-down floating">Excel with Xanula</h1>
+            <p class="text-xl mb-8 animate-fade-in-up">Join the platform of successful learners and have access to interactive workbooks and past exam questions with detailed video and text solutions</p>
+            <div class="flex space-x-4">
+                <a href="{% url 'accounts:signup' %}" class="bg-white text-blue-600 px-6 py-3 rounded-full font-medium hover:bg-gray-100 transition duration-300 animate-fade-in-up">Get Started</a>
+                <button onclick="window.open('https://www.youtube.com/embed/ZkA9Y3PD6rE?si=p3OGrDN6GJZfQVSr', '_blank', 'width=800,height=600')" class="flex items-center space-x-2 bg-transparent border border-white px-6 py-3 rounded-full font-medium hover:bg-white hover:text-blue-600 transition duration-300">
+                    <i class="fas fa-play"></i>
+                    <span>Watch Video</span>
+                </button>
+                
+            </div>
+        </div>
+    
+        <!-- Parallax Background Image -->
+
+    </section>
+    
+<!-- Video Modal -->
+<div x-data="{ openModal: false }" x-cloak>
+    <div x-show="openModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+        <div class="bg-white rounded-lg overflow-hidden shadow-xl max-w-3xl w-full">
+            <div class="flex justify-end p-4">
+                <button @click="openModal = false" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-times fa-lg"></i>
+                </button>
+            </div>
+            <div class="px-6 pb-6">
+                <iframe width="100%" height="400" src="https://www.youtube.com/embed/ZkA9Y3PD6rE?si=p3OGrDN6GJZfQVSr" title="Intro Video" frameborder="0" allowfullscreen></iframe>
+            </div>
         </div>
     </div>
+</div>
+
+
+<!-- Features Section -->
+<section id="features" class="relative py-24 bg-gradient-to-r from-blue-600 to-teal-500 text-white overflow-hidden">
+    <!-- Particle Background -->
+    <div class="absolute inset-0 pointer-events-none">
+        <canvas id="particles-js"></canvas>
+    </div>
+    <div class="relative max-w-7xl mx-auto px-6 text-center">
+        <h2 class="text-5xl font-extrabold mb-4 animate-fade-in-up">Why Xanula Stands Out</h2>
+        <p class="text-xl mb-12 animate-fade-in-up">Immerse yourself in a exceptional learning experience, crafted with passion and precision.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white text-gray-800 p-8 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-5 animate-fade-in-up">
+                <div class="relative">
+                    <div class="relative z-10 flex items-center justify-center w-16 h-16 mx-auto bg-blue-100 text-blue-600 rounded-full mb-6">
+                        <i class="fas fa-chalkboard-teacher fa-3x animated-svg" style="animation: draw 2s forwards;"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4">Best Workbooks</h3>
+                <p class="text-gray-600">Gain knowledge from the best workbooks, written by the your favorite instructors.</p>
+            </div>
+            <div class="bg-white text-gray-800 p-8 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-5 animate-fade-in-up">
+                <div class="relative">
+                    <div class="relative z-10 flex items-center justify-center w-16 h-16 mx-auto bg-blue-100 text-blue-600 rounded-full mb-6">
+                        <i class="fas fa-chalkboard-teacher fa-3x animated-svg" style="animation: draw 2s forwards;"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4">Past Exam Papers</h3>
+                <p class="text-gray-600">From GCE O/L and BEPC to competitive exams, access all past exam papers with detailed video solutions and downloadable pdfs</p>
+            </div>
+            <!-- Feature 2 -->
+            <div class="bg-white text-gray-800 p-8 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-5 animate-fade-in-up">
+                <div class="relative">
+                    <div class="relative z-10 flex items-center justify-center w-16 h-16 mx-auto bg-tint-100 text-green-600 rounded-full mb-6">
+                        <i class="fas fa-laptop-code fa-3x animated-svg" style="animation: draw 2s forwards;"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4">Interactive Learning</h3>
+                <p class="text-gray-600">Engage with immersive, interactive quizzes with detailed solutions.</p>
+            </div>
+            <!-- Feature 3 -->
+            <div class="bg-white text-gray-800 p-8 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-5 animate-fade-in-up">
+                <div class="relative">
+                    <div class="relative z-10 flex items-center justify-center w-16 h-16 mx-auto bg-red-100 text-purple-600 rounded-full mb-6">
+                        <i class="fas fa-text fa-3x animated-svg" style="animation: draw 2s forwards;"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4">Question Explainer</h3>
+                <p class="text-gray-600">Get instant and detailed feeback for the questions you don't understand</p>
+            </div>
+            <div class="bg-white text-gray-800 p-8 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-5 animate-fade-in-up">
+                <div class="relative">
+                    <div class="relative z-10 flex items-center justify-center w-16 h-16 mx-auto bg-orange-100 text-yellow-500 rounded-full mb-6">
+                        <i class="fas fa-message fa-3x animated-svg" style="animation: draw 2s forwards;"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4">Author Feedback</h3>
+                <p class="text-gray-600">Send questions you don't understand to authors and get instant explanation</p>
+            </div>
+            <div class="bg-white text-gray-800 p-8 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-500 hover:-translate-y-5 animate-fade-in-up">
+                <div class="relative">
+                    <div class="relative z-10 flex items-center justify-center w-16 h-16 mx-auto bg-pink-100 text-pink-600 rounded-full mb-6">
+                        <i class="fas fa-clock fa-3x animated-svg" style="animation: draw 2s forwards;"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-semibold mb-4">Flexible Schedule</h3>
+                <p class="text-gray-600">Learn at your own pace, with a schedule that fits your life, not the other way around.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+    <!-- Courses Section -->
+    <section id="courses" class="py-24">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-4">Our Popular resources</h2>
+            <p class="text-lg text-gray-600 mb-12">Choose from a wide range of workbooks and past exam papers tailored to your interests and career goals.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 hover-image-effect">
+                <!-- Course 1 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 tilt-card items-center">
+                    <img class="lazy-loading" data-src="{% static "13.jpg" %}" alt="Course 1" class="w-full h-56 object-cover lazy-loaded align-center">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">Polytechnic Yaounde</h3>
+                        <p class="text-gray-600 mb-4">All past questions with detailed video solutions</p>
+                        <a href="{% url 'accounts:signup' %}" class="text-blue-600 hover:underline">Learn More</a>
+                    </div>
+                </div>
+                <!-- Course 2 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 tilt-card">
+                    <img class="lazy-loading" data-src="{% static "12.jpg" %}" alt="Course 2" class="w-full h-56 object-cover lazy-loaded">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">GCE A/L and O/L</h3>
+                        <p class="text-gray-600 mb-4">Dive into the compressive video solutions to past GCE questions</p>
+                        <a href="{% url 'accounts:signup' %}" class="text-blue-600 hover:underline">Learn More</a>
+                    </div>
+                </div>
+                <!-- Course 3 -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 tilt-card">
+                    <img class="lazy-loading" data-src="{% static "11.jpg" %}" alt="Course 3" class="w-full h-56 object-cover lazy-loaded">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2">Computer made Easy by SAAH</h3>
+                        <p class="text-gray-600 mb-4">Answer iteractive questions from this workbook and get detailed solutions and instant explanations</p>
+                        <a href="{% url 'accounts:signup' %}" class="text-blue-600 hover:underline">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+<!-- Pricing Section -->
+<section id="pricing" class="py-24 bg-gradient-to-r from-blue-600 via-teal-600 to-blue-400 text-white">
+    <div class="max-w-7xl mx-auto px-6 text-center">
+        <h2 class="text-4xl font-bold mb-4 animate-fade-in-up">Flexible Pricing Plans</h2>
+        <p class="text-lg mb-12 animate-fade-in-up">Choose the plan that best fits your learning needs and budget.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Pricing Plan 1 -->
+            <div class="bg-white text-gray-800 p-8 rounded-lg shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-3 animate-fade-in-up">
+                <h3 class="text-2xl font-bold mb-4">1 month plan</h3>
+                <p class="text-4xl font-extrabold mb-6">999XAF<span class="text-xl font-normal"></span></p>
+                <ul class="mb-6 space-y-2">
+                    <li>3 workbooks</li>
+                    <li>2 Past exam papers</li>
+                    <li>Access to instant support</li>
+                </ul>
+                <a href="{% url 'accounts:signup' %}" class="bg-blue-600 text-white px-6 py-3 rounded-full font-medium hover:bg-blue-900 transition">Get Started</a>
+            </div>
+            <!-- Pricing Plan 2 -->
+            <div class="bg-gradient-to-r from-green-500 to-blue-500 p-8 rounded-lg shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-3 transform md:scale-105 animate-fade-in-up">
+                <h3 class="text-2xl font-bold mb-4">6 months Plan</h3>
+                <p class="text-4xl font-extrabold mb-6">7999XAF<span class="text-xl font-normal"></span></p>
+                <ul class="mb-6 space-y-2">
+                    <li>10 workbooks</li>
+                    <li>4 Past exam papers</li>
+                    <li>Instant support</li>
+                </ul>
+                <a href="{% url 'accounts:signup' %}" class="bg-white text-blue-600 px-6 py-3 rounded-full font-medium hover:bg-gray-200 transition">Get Started</a>
+            </div>
+            <!-- Pricing Plan 3 -->
+            <div class="bg-white text-gray-800 p-8 rounded-lg shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-3 animate-fade-in-up">
+                <h3 class="text-2xl font-bold mb-4">1 year Premium </h3>
+                <p class="text-4xl font-extrabold mb-6">9999XAF<span class="text-xl font-normal"></span></p>
+                <ul class="mb-6 space-y-2">
+                    <li>All workbooks</li>
+                    <li>All Past exam papers</li>
+                    <li>24/7 Instant support</li>
+                </ul>
+                <a href="{% url 'accounts:signup' %}" class="bg-blue-600 text-white px-6 py-3 rounded-full font-medium hover:bg-blue-900 transition">Get Started</a>
+            </div>
+        </div>
+    </div>
+</section>
+    <!-- Call to Action Section with Countdown Timer -->
+    <section class="py-24 bg-gradient-to-r from-blue-600 to-teal-500 text-white text-center">
+        <div class="max-w-7xl mx-auto px-6">
+            <p class="text-lg mb-8">Join Xanula today and get 30% off on your first subscription.</p>
+            <div class="mb-8">
+                <span class="text-xl">Limited Time Offer! Ends in:</span>
+                <div x-data="{ timeLeft: 3600 }" x-init="setInterval(() => timeLeft--, 1000)" class="flex justify-center mt-4">
+                    <div class="bg-white text-blue-600 rounded-md px-4 py-2">
+                        <span x-text="Math.floor(timeLeft / 3600)"></span>
+                        <span>h</span>
+                    </div>
+                    <div class="bg-white text-blue-600 rounded-md px-4 py-2 mx-2">
+                        <span x-text="Math.floor((timeLeft % 3600) / 60)"></span>
+                        <span>m</span>
+                    </div>
+                    <div class="bg-white text-blue-600 rounded-md px-4 py-2">
+                        <span x-text="timeLeft % 60"></span>
+                        <span>s</span>
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'accounts:signup' %}" class="bg-white text-blue-600 px-8 py-4 rounded-full font-medium hover:bg-gray-100 transition duration-300">Get Started Now</a>
+        </div>
+    </section>
+
+    
+    <!-- Testimonial Section -->
+    <section id="testimonials" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-4">What Our Learners Say</h2>
+            <p class="text-lg text-gray-600 mb-12">Hear from our community of satisfied learners.</p>
+            <div x-data="{ activeSlide: 1, slides: 3 }" class="relative">
+                <!-- Slides -->
+                <div class="overflow-hidden">
+                    <!-- Slide 1 -->
+                    <div x-show="activeSlide === 1" class="flex flex-col items-center transition duration-500">
+                        <img src="{% static "1.jpg" %}" alt="User 1" class="w-24 h-24 rounded-full mb-6">
+                        <p class="text-xl italic mb-4">"Xanula has transformed my education! The solutions are comprehensive and easy to follow."</p>
+                        <h4 class="text-lg font-semibold">Sarah Nogoudon</h4>
+                        <span class="text-gray-500">High school graduate</span>
+                        <div class="flex mt-2">
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star-half-alt text-yellow-500"></i>
+                        </div>
+                    </div>
+                    <!-- Slide 2 -->
+                    <div x-show="activeSlide === 2" class="flex flex-col items-center transition duration-500">
+                        <img src="{% static "2.jpg" %}" alt="User 2" class="w-24 h-24 rounded-full mb-6">
+                        <p class="text-xl italic mb-4">"The flexibility and quality of content at Xanula are unmatched."</p>
+                        <h4 class="text-lg font-semibold">Donfack Michael</h4>
+                        <span class="text-gray-500">Student UB</span>
+                        <div class="flex mt-2">
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                        </div>
+                    </div>
+                    <!-- Slide 3 -->
+                    <div x-show="activeSlide === 3" class="flex flex-col items-center transition duration-500">
+                        <img src="{% static "3.jpg" %}" alt="User 3" class="w-24 h-24 rounded-full mb-6">
+                        <p class="text-xl italic mb-4">"I finally understood why my solutions where wrong in my instructors workbook. Thank you Xanula"</p>
+                        <h4 class="text-lg font-semibold">Stephanie</h4>
+                        <span class="text-gray-500">High school student</span>
+                        <div class="flex mt-2">
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <i class="fas fa-star text-yellow-500"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="flex justify-center mt-8 space-x-4">
+                    <button @click="activeSlide = activeSlide === 1 ? slides : activeSlide - 1" class="text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-arrow-left fa-lg"></i>
+                    </button>
+                    <button @click="activeSlide = activeSlide === slides ? 1 : activeSlide + 1" class="text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-arrow-right fa-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-24">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+            <p class="text-lg text-gray-600 mb-12">Find answers to some of the most common questions.</p>
+            <div x-data="{ openFAQ: null }" class="text-left max-w-3xl mx-auto">
+                <div class="mb-4">
+                    <button @click="openFAQ === 1 ? openFAQ = null : openFAQ = 1" class="w-full text-left px-4 py-2 bg-gray-100 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
+                        <span class="flex justify-between items-center">
+                            <span>What past exam questions do you have?</span>
+                            <i :class="openFAQ === 1 ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+                        </span>
+                    </button>
+                    <div x-show="openFAQ === 1" class="px-4 py-2">
+                        <p class="text-gray-600">We offer a wide range of past exam papers ranging from BEPC, GCE O/L to competitive exams like FET Buea and POLYTECH Yaounde</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <button @click="openFAQ === 2 ? openFAQ = null : openFAQ = 2" class="w-full text-left px-4 py-2 bg-gray-100 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
+                        <span class="flex justify-between items-center">
+                            <span>Can I learn at my own pace?</span>
+                            <i :class="openFAQ === 2 ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+                        </span>
+                    </button>
+                    <div x-show="openFAQ === 2" class="px-4 py-2">
+                        <p class="text-gray-600">Yes, all our courses are designed for you to learn at your own pace.</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <button @click="openFAQ === 3 ? openFAQ = null : openFAQ = 3" class="w-full text-left px-4 py-2 bg-gray-100 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
+                        <span class="flex justify-between items-center">
+                            <span>Do I get a certificate after completing a course?</span>
+                            <i :class="openFAQ === 3 ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+                        </span>
+                    </button>
+                    <div x-show="openFAQ === 3" class="px-4 py-2">
+                        <p class="text-gray-600">NO, we don't provide certificates</p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <button @click="openFAQ === 4 ? openFAQ = null : openFAQ = 4" class="w-full text-left px-4 py-2 bg-gray-100 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
+                        <span class="flex justify-between items-center">
+                            <span>What payment methods do you accept?</span>
+                            <i :class="openFAQ === 4 ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+                        </span>
+                    </button>
+                    <div x-show="openFAQ === 4" class="px-4 py-2">
+                        <p class="text-gray-600">We accept all major credit cards and Mobile money transfers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section with Countdown Timer -->
+    <section class="py-24 bg-gradient-to-r from-blue-600 to-teal-500 text-white text-center">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-3xl font-bold mb-4">Ready to Start Your Learning Journey?</h2>
+            <p class="text-lg mb-8">Join Xanula today and unlock endless possibilities.</p>
+            <div class="mb-8">
+                <span class="text-xl">Limited Time Offer! Ends in:</span>
+                <div x-data="{ timeLeft: 3600 }" x-init="setInterval(() => timeLeft--, 1000)" class="flex justify-center mt-4">
+                    <div class="bg-white text-blue-600 rounded-md px-4 py-2">
+                        <span x-text="Math.floor(timeLeft / 3600)"></span>
+                        <span>h</span>
+                    </div>
+                    <div class="bg-white text-blue-600 rounded-md px-4 py-2 mx-2">
+                        <span x-text="Math.floor((timeLeft % 3600) / 60)"></span>
+                        <span>m</span>
+                    </div>
+                    <div class="bg-white text-blue-600 rounded-md px-4 py-2">
+                        <span x-text="timeLeft % 60"></span>
+                        <span>s</span>
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'accounts:signup' %}" class="bg-white text-blue-600 px-8 py-4 rounded-full font-medium hover:bg-gray-100 transition duration-300">Get Started Now</a>
+        </div>
+    </section>
+
+
+
+
+
 {% endblock %}
+
+{% block extra_js %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let lazyImages = [].slice.call(document.querySelectorAll("img.lazy-loading"));
+        if ("IntersectionObserver" in window) {
+            let lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        let lazyImage = entry.target;
+                        lazyImage.src = lazyImage.dataset.src;
+                        lazyImage.classList.remove("lazy-loading");
+                        lazyImage.classList.add("lazy-loaded");
+                        lazyImageObserver.unobserve(lazyImage);
+                    }
+                });
+            });
+            lazyImages.forEach(function(lazyImage) {
+                lazyImageObserver.observe(lazyImage);
+            });
+        }
+    });
+
+    /* Scroll-triggered Animations */
+    function onScroll() {
+        const elements = document.querySelectorAll('.slide-in');
+        elements.forEach((element) => {
+            const position = element.getBoundingClientRect().top;
+            const windowHeight = window.innerHeight;
+            if (position < windowHeight - 100) {
+                element.classList.add('visible');
+            }
+        });
+    }
+
+    window.addEventListener('scroll', onScroll);
+</script>
+
+<script>
+particlesJS('particles-js', {
+    "particles": {
+        "number": {
+            "value": 100,
+            "density": {
+                "enable": true,
+                "value_area": 800
+            }
+        },
+        "color": {
+            "value": "#ffffff"
+        },
+        "shape": {
+            "type": "circle",
+            "stroke": {
+                "width": 0,
+                "color": "#000000"
+            },
+            "polygon": {
+                "nb_sides": 10
+            },
+            "image": {
+                "src": "img/github.svg",
+                "width": 1000,
+                "height": 200
+            }
+        },
+        "opacity": {
+            "value": 0.3,
+            "random": false,
+            "anim": {
+                "enable": false,
+                "speed": 0.1,
+                "opacity_min": 0.1,
+                "sync": false
+            }
+        },
+        "size": {
+            "value": 5,
+            "random": true,
+            "anim": {
+                "enable": false,
+                "speed": 1,
+                "size_min": 0.1,
+                "sync": false
+            }
+        },
+        "line_linked": {
+            "enable": true,
+            "distance": 150,
+            "color": "#ffffff",
+            "opacity": 0.3,
+            "width": 1
+        },
+        "move": {
+            "enable": true,
+            "speed": 1,
+            "direction": "none",
+            "random": false,
+            "straight": false,
+            "out_mode": "out",
+            "bounce": false,
+            "attract": {
+                "enable": false,
+                "rotateX": 600,
+                "rotateY": 1200
+            }
+        }
+    },
+    "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+            "onhover": {
+                "enable": true,
+                "mode": "repulse"
+            },
+            "onclick": {
+                "enable": true,
+                "mode": "push"
+            },
+            "resize": true
+        },
+        "modes": {
+            "grab": {
+                "distance": 400,
+                "line_linked": {
+                    "opacity": 1
+                }
+            },
+            "bubble": {
+                "distance": 400,
+                "size": 40,
+                "duration": 2,
+                "opacity": 8,
+                "speed": 3
+            },
+            "repulse": {
+                "distance": 200,
+                "duration": 0.4
+            },
+            "push": {
+                "particles_nb": 4
+            },
+            "remove": {
+                "particles_nb": 2
+            }
+        }
+    },
+    "retina_detect": true
+});
+</script>
+
+{% endblock extra_js %}
