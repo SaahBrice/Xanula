@@ -1,8 +1,8 @@
 import os
 import anthropic
 
-#client = anthropic.Client('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')
-client = anthropic.Client(api_key='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')
+
+client = anthropic.Client(api_key='your api key')
 
 def get_ai_explanation(question, correct_answer, user_answer):
 
